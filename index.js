@@ -46,6 +46,23 @@ document.addEventListener('DOMContentLoaded', () => {
     initProgressIndicators();
     updateNavigationState();
 
+    // Mobile Web Audio API Unlock Helper
+    const unlockAudio = () => {
+        if (!audioCtx) {
+            initAudioSynth();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume().then(() => {
+                window.removeEventListener('click', unlockAudio);
+                window.removeEventListener('touchstart', unlockAudio);
+                window.removeEventListener('touchend', unlockAudio);
+            }).catch(err => console.log('Audio resume failed:', err));
+        }
+    };
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+    window.addEventListener('touchend', unlockAudio);
+
     // Event Listeners
     btnStart.addEventListener('click', startExperience);
     navPrevBtn.addEventListener('click', prevSlide);
