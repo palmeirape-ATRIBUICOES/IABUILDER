@@ -652,6 +652,168 @@ body, html {
     transition: opacity 0.8s ease 0.5s;
 }
 
+/* ==========================================================================
+   INTERACTIVE TIMELINE & QUADRANT STYLES
+   ========================================================================== */
+
+/* Timeline Slide */
+.slide[data-type="timeline-slide"] {
+    background-color: var(--bg-black);
+}
+
+.timeline-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    padding: 3rem 0;
+    margin-top: 2rem;
+}
+
+.timeline-line {
+    position: absolute;
+    top: 55px; /* Center of the dots */
+    left: 5%;
+    width: 90%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, var(--accent-blue) 80%, var(--text-white) 100%);
+    pointer-events: none;
+}
+
+.timeline-items {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+.timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.2rem;
+    width: 130px;
+    transition: all var(--transition-quick);
+}
+
+.timeline-year {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+.timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--text-muted);
+    border: 3px solid var(--bg-black);
+    box-shadow: 0 0 0 2px var(--text-muted);
+}
+
+.timeline-dot-user {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: var(--accent-blue);
+    color: var(--bg-black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--bg-black);
+    box-shadow: 0 0 15px var(--accent-blue-glow), 0 0 0 2px var(--accent-blue);
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.timeline-label {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    color: var(--text-white);
+    line-height: 1.2;
+}
+
+.timeline-item.highlight .timeline-year {
+    color: var(--accent-blue);
+}
+
+.timeline-item.highlight .timeline-label {
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+/* Quadrant Slide */
+.slide[data-type="quadrant-slide"] {
+    background-color: #ffffff;
+}
+
+.quadrant-container {
+    display: flex;
+    width: 100%;
+    max-width: 1000px;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    justify-content: space-between;
+}
+
+.quadrant-item {
+    flex: 1;
+    background-color: #f4f4f7;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    padding: 2.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 260px;
+    text-align: center;
+    transition: all var(--transition-quick);
+}
+
+.quadrant-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    border-color: var(--accent-blue);
+}
+
+.quadrant-num {
+    font-family: var(--font-sans);
+    font-size: 2rem;
+    font-weight: 800;
+    color: rgba(0, 0, 0, 0.1);
+    letter-spacing: -0.05em;
+    transition: color var(--transition-quick);
+}
+
+.quadrant-item:hover .quadrant-num {
+    color: var(--accent-blue);
+}
+
+.quadrant-label {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    color: var(--text-dark);
+    font-weight: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.arrow-indicator {
+    color: var(--accent-blue);
+    font-size: 1rem;
+}
+
+.quadrant-footer {
+    max-width: 800px;
+}
+
 /* Adjustments for White Pages Elements */
 .light-theme-active .top-bar .brand-title,
 .light-theme-active .top-bar .btn-text-only,
@@ -810,5 +972,92 @@ body, html {
     /* Force background images to center in mobile portrait crop */
     .slide[data-type="image-full"] {
         background-position: 50% 50%;
+    }
+
+    /* Mobile Timeline Adjustments */
+    .timeline-container {
+        padding: 0 1.5rem;
+        margin-top: 1.5rem;
+        width: 100%;
+        max-width: 320px;
+    }
+    
+    .timeline-line {
+        top: 0;
+        left: 21px; /* Centers with dots on left */
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, var(--accent-blue) 80%, var(--text-white) 100%);
+        transform: none;
+    }
+    
+    .timeline-items {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+    
+    .timeline-item {
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        width: 100%;
+        gap: 1.5rem;
+    }
+    
+    .timeline-year {
+        width: 45px;
+        text-align: right;
+        font-size: 0.75rem;
+    }
+    
+    .timeline-dot {
+        margin-left: 0;
+        border-width: 2px;
+    }
+    
+    .timeline-dot-user {
+        margin-left: -7px; /* Align larger dot perfectly */
+    }
+    
+    .timeline-label {
+        font-size: 1rem;
+        text-align: left;
+    }
+
+    /* Mobile Quadrant Adjustments */
+    .quadrant-container {
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        width: 100%;
+    }
+    
+    .quadrant-item {
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        height: auto;
+        padding: 1.2rem 1.5rem;
+        gap: 1.5rem;
+        text-align: left;
+    }
+    
+    .quadrant-num {
+        font-size: 1.5rem;
+    }
+    
+    .quadrant-label {
+        font-size: 1.05rem;
+        flex-direction: row;
+        gap: 0.6rem;
+    }
+    
+    .arrow-indicator {
+        transform: rotate(0deg);
+    }
+    
+    .quadrant-footer {
+        margin-top: 1rem;
     }
 }

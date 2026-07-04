@@ -151,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startExperience() {
-        goToSlide(1);
         // Automatically start audio if user clicks start, standard browser policies require user interaction
         if (!audioCtx) {
             initAudioSynth();
@@ -159,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isPlayingAudio) {
             startAudioSynth();
         }
+        goToSlide(1);
     }
 
     function goToSlide(index) {
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // OSC 1: Deep low frequency (55Hz - A1 Note)
         osc1 = audioCtx.createOscillator();
-        osc1.type = 'sawtooth';
+        osc1.type = 'triangle';
         osc1.frequency.setValueAtTime(55, audioCtx.currentTime);
         
         const osc1Gain = audioCtx.createGain();
@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // OSC 2: Detuned slightly for a rich beating chorusing effect (55.5Hz)
         osc2 = audioCtx.createOscillator();
-        osc2.type = 'sawtooth';
+        osc2.type = 'triangle';
         osc2.frequency.setValueAtTime(55.6, audioCtx.currentTime);
 
         const osc2Gain = audioCtx.createGain();
