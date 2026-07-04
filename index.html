@@ -40,6 +40,7 @@
             </div>
 
             <div class="options-menu">
+                <button id="summary-toggle" class="btn-text-only" title="Ver Índice">Índice</button>
                 <button id="autoplay-toggle" class="btn-text-only" title="Modo Auto-Play">Auto-Play: OFF</button>
                 <button id="fullscreen-toggle" class="btn-icon-small" title="Tela Cheia">
                     <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
@@ -962,6 +963,37 @@
         <div class="touch-hotspot touch-right" id="hotspot-right"></div>
         
     </div>
+
+    <!-- Tabela de Conteúdos (Drawer de Índice) -->
+    <div id="summary-drawer" class="summary-drawer">
+        <div class="drawer-header">
+            <span class="drawer-title">IA BUILDER™ — ÍNDICE DO LIVRO</span>
+            <button id="drawer-close" class="btn-icon-small" aria-label="Fechar índice">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div class="drawer-content">
+            <div class="drawer-section">
+                <h4>CAPÍTULO 1 : A Maior Oportunidade da Nossa Geração</h4>
+                <ul>
+                    <li data-target="0"><span class="li-bullet"></span> Capa do Volume 1</li>
+                    <li data-target="1"><span class="li-bullet"></span> Pág 01: O Futuro Silencioso</li>
+                    <li data-target="12"><span class="li-bullet"></span> Pág 12: A Barreira da Tecnologia</li>
+                    <li data-target="23"><span class="li-bullet"></span> Pág 23: Oportunidades Ocultas</li>
+                    <li data-target="35"><span class="li-bullet"></span> Pág 35: Construtor de Soluções com IA</li>
+                    <li data-target="46"><span class="li-bullet"></span> Pág 46: A Evolução das Ferramentas</li>
+                </ul>
+            </div>
+            <div class="drawer-section">
+                <h4>CAPÍTULO 2 : A Mentira que Paralisou uma Geração</h4>
+                <ul>
+                    <li data-target="61"><span class="li-bullet"></span> Pág 61: O Instinto de Construir</li>
+                    <li data-target="64"><span class="li-bullet"></span> Pág 64: A Sala de Aula e a Desistência</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="drawer-overlay" class="drawer-overlay"></div>
 
     <script src="index.js"></script>
 </body>

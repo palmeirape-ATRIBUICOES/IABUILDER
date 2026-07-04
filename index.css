@@ -421,9 +421,11 @@ body, html {
 }
 
 .progress-indicator {
-    height: 3px;
+    height: 19px;
+    padding: 8px 0;
     flex-grow: 1;
     background-color: rgba(255, 255, 255, 0.15);
+    background-clip: content-box;
     border-radius: 2px;
     position: relative;
     overflow: hidden;
@@ -432,11 +434,11 @@ body, html {
 }
 
 .progress-indicator:hover {
-    height: 5px;
+    height: 21px;
 }
 
 .progress-indicator-fill {
-    height: 100%;
+    height: 3px;
     width: 0%;
     background-color: var(--accent-blue);
     box-shadow: 0 0 10px var(--accent-blue-glow);
@@ -1060,4 +1062,185 @@ body, html {
     .quadrant-footer {
         margin-top: 1rem;
     }
+}
+
+/* ==========================================================================
+   SUMMARY DRAWER & OVERLAY STYLES
+   ========================================================================== */
+
+.summary-drawer {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    width: 100%;
+    max-height: 85%;
+    background: rgba(10, 10, 12, 0.96);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px 20px 0 0;
+    z-index: 1000;
+    transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-drawer.open {
+    bottom: 0;
+}
+
+.drawer-header {
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.drawer-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.25em;
+    color: var(--accent-blue);
+    text-shadow: 0 0 10px var(--accent-blue-glow);
+}
+
+.drawer-content {
+    padding: 2.5rem 2rem;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+}
+
+.drawer-section h4 {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+    border-left: 2px solid var(--accent-blue);
+    padding-left: 0.8rem;
+}
+
+.drawer-section ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.drawer-section li {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    color: var(--text-white);
+    opacity: 0.75;
+    cursor: pointer;
+    transition: all var(--transition-quick);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.drawer-section li:hover {
+    opacity: 1;
+    color: var(--accent-blue);
+    transform: translateX(5px);
+}
+
+.li-bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--accent-blue);
+    display: inline-block;
+    opacity: 0.6;
+}
+
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 999;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.drawer-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ==========================================================================
+   BOOK-STAGE WINDOW EFFECT (Desktop only)
+   ========================================================================== */
+@media (min-width: 769px) {
+    .app-container {
+        background: radial-gradient(circle at center, #18181c 0%, #050505 100%);
+    }
+
+    .slides-wrapper {
+        max-width: 1050px;
+        max-height: 650px;
+        width: 90%;
+        height: 80%;
+        margin: auto;
+        border-radius: 12px;
+        box-shadow: 0 45px 110px rgba(0, 0, 0, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Double-page fold divider line */
+    .slide::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 1px;
+        height: 100%;
+        z-index: 4;
+        pointer-events: none;
+        transition: opacity var(--transition-quick);
+    }
+    
+    .slide[data-type="image-full"]::after {
+        background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 15%, rgba(255,255,255,0.04) 85%, rgba(255,255,255,0) 100%);
+    }
+    
+    .slide[data-type="white-text-only"]::after {
+        background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.05) 85%, rgba(0,0,0,0) 100%);
+    }
+
+    .slide[data-type="black-text-only"]::after {
+        background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.03) 15%, rgba(255,255,255,0.03) 85%, rgba(255,255,255,0) 100%);
+    }
+}
+
+/* Adjustments for light theme summary drawer */
+.light-theme-active .summary-drawer {
+    background: rgba(250, 250, 252, 0.97);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.light-theme-active .drawer-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.light-theme-active .drawer-close {
+    color: var(--text-dark);
+}
+.light-theme-active .drawer-section li {
+    color: var(--text-dark);
+    opacity: 0.85;
+}
+.light-theme-active .drawer-section li:hover {
+    color: var(--accent-blue);
 }

@@ -16,6 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBarContainer = document.querySelector('.progress-bar-container');
     const hotspotLeft = document.getElementById('hotspot-left');
     const hotspotRight = document.getElementById('hotspot-right');
+    const summaryToggleBtn = document.getElementById('summary-toggle');
+    const summaryDrawer = document.getElementById('summary-drawer');
+    const drawerCloseBtn = document.getElementById('drawer-close');
+    const drawerOverlay = document.getElementById('drawer-overlay');
 
     // State Variables
     let currentSlideIndex = 0; // 0 is Intro/Cover, 1-11 are Storyboard pages
@@ -72,6 +76,40 @@ document.addEventListener('DOMContentLoaded', () => {
     soundToggleBtn.addEventListener('click', toggleAudio);
     autoplayToggleBtn.addEventListener('click', toggleAutoplay);
     fullscreenToggleBtn.addEventListener('click', toggleFullscreen);
+
+    // Index Drawer Event Listeners
+    if (summaryToggleBtn) {
+        summaryToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            summaryDrawer.classList.toggle('open');
+            drawerOverlay.classList.toggle('open');
+        });
+    }
+
+    if (drawerCloseBtn) {
+        drawerCloseBtn.addEventListener('click', () => {
+            summaryDrawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+        });
+    }
+
+    if (drawerOverlay) {
+        drawerOverlay.addEventListener('click', () => {
+            summaryDrawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+        });
+    }
+
+    // Handle clicks inside drawer links
+    const drawerItems = document.querySelectorAll('.summary-drawer li[data-target]');
+    drawerItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const targetIndex = parseInt(item.getAttribute('data-target'));
+            goToSlide(targetIndex);
+            summaryDrawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+        });
+    });
 
     // Touch Swipe detection
     app.addEventListener('touchstart', (e) => {
@@ -241,10 +279,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Toggle white page background UI colors
         const currentSlideType = slides[currentSlideIndex].dataset.type;
-        if (currentSlideType === 'white-text-only') {
+        if (currentSlideType === 'white-text-only' || currentSlideType === 'quadrant-slide') {
             app.classList.add('light-theme-active');
         } else {
             app.classList.remove('light-theme-active');
+        }
+
+        // Update top bar title depending on Chapter
+        const volumeTitle = document.querySelector('.volume-title');
+        if (volumeTitle) {
+            if (currentSlideIndex >= 61) {
+                volumeTitle.textContent = "Volume 1 : Capítulo 2";
+            } else {
+                volumeTitle.textContent = "Volume 1 : Capítulo 1";
+            }
         }
     }
 
