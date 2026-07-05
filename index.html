@@ -9,6 +9,64 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="index.css">
+    
+    <!-- ==========================================================================
+       TRAFFIC & CONVERSION ANALYTICS (GA4, Meta Pixel, Microsoft Clarity)
+       Para ativar, basta substituir os IDs de exemplo 'SEU-ID-XXX' pelos seus IDs reais.
+       ========================================================================== -->
+    <script>
+        // Configuração de IDs de Rastreamento (Substitua quando tiver os seus!)
+        window.ANALYTICS_CONFIG = {
+            googleAnalyticsId: 'G-SEU-ID-GA4',    // Insira seu ID de GA4 (ex: G-A1B2C3D4E5)
+            metaPixelId: 'SEU-ID-META-PIXEL',      // Insira seu ID do Meta/Facebook Pixel
+            clarityId: 'SEU-ID-CLARITY'            // Insira seu ID do Microsoft Clarity
+        };
+    </script>
+
+    <!-- Google Analytics (GA4) -->
+    <script>
+        if (window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.ANALYTICS_CONFIG.googleAnalyticsId;
+            document.head.appendChild(script);
+
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', window.ANALYTICS_CONFIG.googleAnalyticsId, {
+                send_page_view: false // Controlado manualmente via JS ao passar os slides
+            });
+            window.gtag = gtag;
+        }
+    </script>
+
+    <!-- Meta / Facebook Pixel -->
+    <script>
+        if (window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', window.ANALYTICS_CONFIG.metaPixelId);
+            window.fbq = fbq;
+        }
+    </script>
+
+    <!-- Microsoft Clarity (Session Replay & Funnels) -->
+    <script>
+        if (window.ANALYTICS_CONFIG.clarityId && window.ANALYTICS_CONFIG.clarityId !== 'SEU-ID-CLARITY') {
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", window.ANALYTICS_CONFIG.clarityId);
+        }
+    </script>
 </head>
 <body>
     <!-- App Container -->
@@ -43,20 +101,12 @@
             <div id="page-counter" class="page-counter">Capa</div>
 
             <div class="options-menu">
-                <button id="narration-toggle" class="btn-text-only" title="Ativar Narração de Voz">Voz: OFF</button>
-                <button id="narration-play-pause" class="btn-icon-small" title="Tocar/Pausar Narração" style="display: none;">
-                    <svg id="play-icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-                    <svg id="pause-icon" viewBox="0 0 24 24" width="18" height="18" style="display: none;"><path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                </button>
                 <button id="autoplay-toggle" class="btn-text-only" title="Modo Auto-Play">Auto-Play: OFF</button>
                 <button id="fullscreen-toggle" class="btn-icon-small" title="Tela Cheia">
                     <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
                 </button>
             </div>
         </div>
-
-        <!-- Narrator Voice Audio Element -->
-        <audio id="narrator-audio" src="narracao.m4a" preload="auto"></audio>
 
         <!-- Book Slides Container -->
         <div class="slides-wrapper">

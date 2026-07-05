@@ -42,17 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let osc1 = null, osc2 = null, oscSub = null;
     let lfo = null, filter = null;
 
-    // Narration Audio State (Narrator Voice Track)
-    const narratorAudio = document.getElementById('narrator-audio');
-    const narrationToggleBtn = document.getElementById('narration-toggle');
-    const narrationPlayPauseBtn = document.getElementById('narration-play-pause');
-    const playIcon = document.getElementById('play-icon');
-    const pauseIcon = document.getElementById('pause-icon');
-    
-    let isNarrationActive = false;
-    let isNarrationPlaying = false;
-    let cardDuration = 15; // Estimated duration per card (will be calculated dynamically)
-
     // Initialize App
     app.classList.add('intro-active'); // Ensure intro class is present on load
     initProgressIndicators();
@@ -85,13 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
     autoplayToggleBtn.addEventListener('click', toggleAutoplay);
     fullscreenToggleBtn.addEventListener('click', toggleFullscreen);
     
-    // Narration Event Listeners
-    narrationToggleBtn.addEventListener('click', toggleNarration);
-    narrationPlayPauseBtn.addEventListener('click', toggleNarrationPlayback);
-    narratorAudio.addEventListener('loadedmetadata', onNarrationMetadataLoaded);
-    narratorAudio.addEventListener('timeupdate', onNarrationTimeUpdate);
-    narratorAudio.addEventListener('ended', onNarrationEnded);
-
     // Touch Swipe detection
     app.addEventListener('touchstart', (e) => {
         touchstartX = e.changedTouches[0].screenX;
@@ -195,22 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update App Classes
         if (currentSlideIndex === 0) {
             app.classList.add('intro-active');
-            // Stop narration if on cover
-            if (isNarrationPlaying) {
-                pauseNarration();
-            }
         } else {
             app.classList.remove('intro-active');
-            
-            // Sync Narration Time if active
-            if (isNarrationActive && narratorAudio && narratorAudio.duration) {
-                const targetTime = (currentSlideIndex - 1) * cardDuration;
-                // Avoid tiny infinite loops of timeupdate
-                if (Math.abs(narratorAudio.currentTime - targetTime) > 2) {
-                    narratorAudio.currentTime = targetTime;
-                }
-            }
         }
+
+        // Fire paid traffic analytics tracking events (GA4, Facebook Pixel, Clarity)
+        trackSlideView(currentSlideIndex);
 
         updateNavigationState();
         resetAutoplayTimer();
@@ -479,97 +451,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ==========================================================================
-       Narration Voicetrack Management (Kling/NotebookLM Audio Sinc)
+       TRAFFIC & FUNNEL ANALYTICS TELEMETRY (Paid Traffic Funnel Optimization)
        ========================================================================== */
 
-    function toggleNarration() {
-        isNarrationActive = !isNarrationActive;
+    function trackSlideView(index) {
+        const virtualUrl = index === 0 ? '/' : `/card-${index}`;
+        const pageName = index === 0 ? 'Capa do Livro' : `Card ${String(index).padStart(2, '0')}`;
         
-        if (isNarrationActive) {
-            narrationToggleBtn.textContent = 'Voz: ON';
-            narrationToggleBtn.classList.add('active');
-            narrationPlayPauseBtn.style.display = 'inline-flex';
+        console.log(`[Analytics] Tracked view: ${pageName} (${virtualUrl})`);
+
+        // 1. Google Analytics 4 (GA4) Page View Sinc
+        if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
+            gtag('event', 'page_view', {
+                page_title: pageName,
+                page_path: virtualUrl,
+                page_location: window.location.origin + window.location.pathname + `?slide=${index}`
+            });
             
-            // Auto play if already started reading
-            if (currentSlideIndex > 0) {
-                // Ensure ambient synth goes low (ducking effect)
-                if (isPlayingAudio && masterGain) {
-                    masterGain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 1.0);
-                }
-                playNarration();
+            // Dispara evento de conversão específico ao atingir o último slide (fim da jornada)
+            if (index === bookSlidesCount) {
+                gtag('event', 'completed_book_reading', {
+                    event_category: 'engagement',
+                    event_label: 'Leitor leu todos os 60 cards'
+                });
             }
-        } else {
-            narrationToggleBtn.textContent = 'Voz: OFF';
-            narrationToggleBtn.classList.remove('active');
-            narrationPlayPauseBtn.style.display = 'none';
-            pauseNarration();
+        }
+
+        // 2. Meta (Facebook) Pixel Page View Sinc
+        if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
+            // Envia um pageview customizado simulando mudança de página
+            fbq('track', 'PageView', {}, { eventID: 'view_' + index });
             
-            // Restore ambient synth volume to full
-            if (isPlayingAudio && masterGain) {
-                masterGain.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + 1.0);
+            // Envia evento customizado para funil de tráfego pago
+            fbq('trackCustom', 'CardView', {
+                cardIndex: index,
+                cardTitle: pageName
+            });
+
+            // Dispara Lead/Conversão customizada ao chegar na metade ou no fim do livro
+            if (index === Math.round(bookSlidesCount / 2)) {
+                fbq('trackCustom', 'MidBookReached', { content_name: 'Chegou na metade do Capítulo 1' });
             }
-        }
-    }
-
-    function toggleNarrationPlayback() {
-        if (isNarrationPlaying) {
-            pauseNarration();
-        } else {
-            playNarration();
-        }
-    }
-
-    function playNarration() {
-        if (!narratorAudio) return;
-        
-        // Sync starting time to current slide if just starting
-        if (narratorAudio.duration) {
-            const targetTime = (currentSlideIndex - 1) * cardDuration;
-            if (Math.abs(narratorAudio.currentTime - targetTime) > 3) {
-                narratorAudio.currentTime = targetTime >= 0 ? targetTime : 0;
+            if (index === bookSlidesCount) {
+                fbq('track', 'Lead', { content_name: 'Concluiu a leitura de 60 cards' });
             }
         }
 
-        narratorAudio.play().then(() => {
-            isNarrationPlaying = true;
-            playIcon.style.display = 'none';
-            pauseIcon.style.display = 'block';
-            narrationPlayPauseBtn.classList.add('playing');
-        }).catch(err => {
-            console.error('Falha ao reproduzir áudio da narração:', err.message);
-        });
-    }
-
-    function pauseNarration() {
-        if (!narratorAudio) return;
-        narratorAudio.pause();
-        isNarrationPlaying = false;
-        playIcon.style.display = 'block';
-        pauseIcon.style.display = 'none';
-        narrationPlayPauseBtn.classList.remove('playing');
-    }
-
-    function onNarrationMetadataLoaded() {
-        if (narratorAudio.duration) {
-            cardDuration = narratorAudio.duration / bookSlidesCount;
-            console.log(`Narração carregada. Duração total: ${narratorAudio.duration}s. Fatias por card: ${cardDuration}s`);
+        // 3. Microsoft Clarity Page / Event Sinc
+        if (typeof clarity === 'function' && window.ANALYTICS_CONFIG.clarityId && window.ANALYTICS_CONFIG.clarityId !== 'SEU-ID-CLARITY') {
+            clarity("set", "active_card", String(index));
+            if (index === bookSlidesCount) {
+                clarity("set", "reading_finished", "true");
+            }
         }
-    }
-
-    function onNarrationTimeUpdate() {
-        if (!isNarrationActive || !narratorAudio.duration) return;
-        
-        // Calculate the card that matches the current timestamp of the audio
-        const currentProgressCard = Math.floor(narratorAudio.currentTime / cardDuration) + 1;
-        
-        // Auto navigate if the audio has advanced past the current card threshold
-        if (currentProgressCard > 0 && currentProgressCard <= bookSlidesCount && currentProgressCard !== currentSlideIndex) {
-            goToSlide(currentProgressCard);
-        }
-    }
-
-    function onNarrationEnded() {
-        pauseNarration();
-        goToSlide(0); // Return to cover when narrative is over
     }
 });
