@@ -294,6 +294,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 volumeTitle.textContent = "Volume 1 : Capítulo 1";
             }
         }
+
+        // Update page counter
+        const pageCounter = document.getElementById('page-counter');
+        if (pageCounter) {
+            if (currentSlideIndex === 0) {
+                pageCounter.textContent = "Capa";
+            } else {
+                const currentPageString = String(currentSlideIndex).padStart(2, '0');
+                const totalPagesString = String(bookSlidesCount).padStart(2, '0');
+                pageCounter.textContent = `${currentPageString} / ${totalPagesString}`;
+            }
+        }
     }
 
     /* ==========================================================================
