@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         osc1.frequency.setValueAtTime(55, audioCtx.currentTime);
         
         const osc1Gain = audioCtx.createGain();
-        osc1Gain.gain.setValueAtTime(0.55, audioCtx.currentTime);
+        osc1Gain.gain.setValueAtTime(0.9, audioCtx.currentTime);
         osc1.connect(osc1Gain);
         osc1Gain.connect(filter);
 
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         osc2.frequency.setValueAtTime(55.6, audioCtx.currentTime);
 
         const osc2Gain = audioCtx.createGain();
-        osc2Gain.gain.setValueAtTime(0.55, audioCtx.currentTime);
+        osc2Gain.gain.setValueAtTime(0.9, audioCtx.currentTime);
         osc2.connect(osc2Gain);
         osc2Gain.connect(filter);
 
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         oscSub.frequency.setValueAtTime(27.5, audioCtx.currentTime);
 
         const subGain = audioCtx.createGain();
-        subGain.gain.setValueAtTime(0.65, audioCtx.currentTime);
+        subGain.gain.setValueAtTime(0.95, audioCtx.currentTime);
         oscSub.connect(subGain);
         subGain.connect(filter);
 
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fade in volume smoothly to avoid pops (2 seconds fade)
-        masterGain.gain.linearRampToValueAtTime(0.8, audioCtx.currentTime + 2);
+        masterGain.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + 2);
         
         isPlayingAudio = true;
         soundToggleBtn.classList.add('playing');
