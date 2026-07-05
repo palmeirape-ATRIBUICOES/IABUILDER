@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // State Variables
     let currentSlideIndex = 0; // 0 is Intro/Cover, 1-11 are Storyboard pages
-    const bookSlidesCount = slides.length - 1; // Number of storyboard slides (excludes cover)
+    const bookSlidesCount = slides.length - 2; // Number of storyboard slides (excludes cover and final screen)
     
     // Autoplay Settings
     let autoplayActive = false;
@@ -191,9 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function nextSlide() {
         if (currentSlideIndex < slides.length - 1) {
             goToSlide(currentSlideIndex + 1);
-        } else {
-            // Loop back to first content page (page 1) when finished
-            goToSlide(1);
         }
     }
 
@@ -211,6 +208,19 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             navPrevBtn.style.opacity = '';
             navPrevBtn.style.pointerEvents = 'auto';
+        }
+
+        // Show/hide next button on the final screen
+        if (currentSlideIndex === slides.length - 1) {
+            navNextBtn.style.opacity = '0';
+            navNextBtn.style.pointerEvents = 'none';
+            // Disable autoplay system when reaching the form to let user type
+            if (autoplayActive) {
+                toggleAutoplay();
+            }
+        } else {
+            navNextBtn.style.opacity = '';
+            navNextBtn.style.pointerEvents = 'auto';
         }
 
         // Update top progress indicators visual representation
@@ -256,6 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pageCounter) {
             if (currentSlideIndex === 0) {
                 pageCounter.textContent = 'Capa';
+            } else if (currentSlideIndex === slides.length - 1) {
+                pageCounter.textContent = 'Convite';
             } else {
                 const pageNum = String(currentSlideIndex).padStart(2, '0');
                 const totalPages = String(bookSlidesCount).padStart(2, '0');
@@ -561,5 +573,99 @@ document.addEventListener('DOMContentLoaded', () => {
                 clarity("set", "reading_finished", "true");
             }
         }
+    }
+
+    // ==========================================================================
+    // WORKSHOP REGISTRATION FORM HANDLER
+    // ==========================================================================
+    const leadForm = document.getElementById('lead-form');
+    if (leadForm) {
+        leadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btn-submit-lead');
+            const nameInput = document.getElementById('lead-name');
+            const emailInput = document.getElementById('lead-email');
+            const phoneInput = document.getElementById('lead-phone');
+
+            // Disable form and show loading
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Enviando...';
+
+            const leadData = {
+                name: nameInput.value.trim(),
+                email: emailInput.value.trim(),
+                whatsapp: phoneInput.value.trim(),
+                registeredAt: Date.now()
+            };
+
+            // Retrieve current session to append lead details
+            const session = getOrCreateSession();
+            const telemetryPayload = {
+                id: session.id,
+                startTime: session.start,
+                lastActive: Date.now(),
+                maxPage: currentSlideIndex,
+                currentPage: currentSlideIndex,
+                utmSource: session.utmSource,
+                utmMedium: session.utmMedium,
+                utmCampaign: session.utmCampaign,
+                adId: session.adId,
+                referrer: session.referrer,
+                device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+                lead: leadData // Embed lead data directly inside the session object
+            };
+
+            try {
+                // Post updated session telemetry with lead data
+                await fetch(`https://kvdb.io/${BUCKET_ID}/session:${session.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(telemetryPayload)
+                });
+            } catch (err) {
+                console.warn('Telemetry sync error on lead registration:', err);
+            }
+
+            // Save to localStorage for quick client-side reference
+            localStorage.setItem('iabuilder_lead_registered', 'true');
+            localStorage.setItem('iabuilder_lead_name', leadData.name);
+
+            // 1. Fire Google Analytics 4 Sign Up event
+            if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
+                gtag('event', 'sign_up', {
+                    method: 'Formulário Workshop',
+                    user_email: leadData.email
+                });
+            }
+
+            // 2. Fire Meta (Facebook) Pixel CompleteRegistration event
+            if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
+                fbq('track', 'CompleteRegistration', {
+                    content_name: 'Workshop Prático ao Vivo',
+                    status: 'Success'
+                });
+            }
+
+            // 3. Fire Clarity Lead Event
+            if (typeof clarity === 'function' && window.ANALYTICS_CONFIG.clarityId && window.ANALYTICS_CONFIG.clarityId !== 'SEU-ID-CLARITY') {
+                clarity("set", "lead_registered", "true");
+            }
+
+            // Animate transition to success state view
+            const formView = document.getElementById('final-form-view');
+            const successView = document.getElementById('final-success-view');
+
+            if (formView && successView) {
+                formView.style.display = 'none';
+                successView.style.display = 'flex';
+                
+                // Scroll container to top of screen on mobile to show the success mark
+                const slideFinal = document.getElementById('slide-final');
+                if (slideFinal) {
+                    slideFinal.scrollTop = 0;
+                }
+            }
+        });
     }
 });
