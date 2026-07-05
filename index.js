@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
        ========================================================================== */
 
     // Analytics Bucket ID (Public key-value store on kvdb.io)
-    const BUCKET_ID = 'ia_builder_analytics_eb00d9d';
+    const BUCKET_ID = 'NbpUd2gxH9Ss93y3hCGeFV';
 
     // Initialize session telemetry on user entry
     function getOrCreateSession() {
