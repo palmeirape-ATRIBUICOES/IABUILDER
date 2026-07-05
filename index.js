@@ -526,12 +526,12 @@ document.addEventListener('DOMContentLoaded', () => {
             device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'
         };
 
-        // Fire background fetch to write logs (fails silently, no UI lock)
-        fetch(`https://kvdb.io/${BUCKET_ID}/session:${session.id}`, {
-            method: 'POST',
+        // Send telemetry payload to Firebase Realtime Database
+        fetch(`https://iabuilder-8a7e7-default-rtdb.firebaseio.com/sessions/${session.id}.json`, {
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(telemetryPayload)
-        }).catch(err => console.warn('Telemetry sync offline'));
+        }).catch(err => console.warn('Telemetry sync offline', err));
 
         // 1. Google Analytics 4 (GA4) Page View Sinc
         if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
@@ -671,9 +671,9 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                // Post updated session telemetry with lead data
-                await fetch(`https://kvdb.io/${BUCKET_ID}/session:${session.id}`, {
-                    method: 'POST',
+                // Post updated session telemetry with lead data to Firebase
+                await fetch(`https://iabuilder-8a7e7-default-rtdb.firebaseio.com/sessions/${session.id}.json`, {
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(telemetryPayload)
                 });
