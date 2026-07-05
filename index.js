@@ -545,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index === bookSlidesCount) {
                 gtag('event', 'completed_book_reading', {
                     event_category: 'engagement',
-                    event_label: 'Leitor leu todos os 60 cards'
+                    event_label: 'Leitor leu todos os todos os cards'
                 });
             }
         }
@@ -562,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fbq('trackCustom', 'MidBookReached', { content_name: 'Chegou na metade do Capítulo 1' });
             }
             if (index === bookSlidesCount) {
-                fbq('track', 'Lead', { content_name: 'Concluiu a leitura de 60 cards' });
+                fbq('track', 'Lead', { content_name: 'Concluiu a leitura de todos os cards' });
             }
         }
 
