@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lfo = null, filter = null;
 
     // Initialize App
+    app.classList.add('intro-active'); // Ensure intro class is present on load
     initProgressIndicators();
     updateNavigationState();
 

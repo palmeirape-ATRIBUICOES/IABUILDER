@@ -670,6 +670,15 @@ body, html {
     transition: opacity 0.8s ease 0.5s;
 }
 
+/* Clear top dark gradient background and branding titles once the reading experience starts */
+.app-container:not(.intro-active) .top-bar {
+    background: none !important;
+}
+
+.app-container:not(.intro-active) .brand-info {
+    display: none !important;
+}
+
 /* ==========================================================================
    INTERACTIVE TIMELINE & QUADRANT STYLES
    ========================================================================== */
