@@ -887,6 +887,18 @@ body, html {
         flex-direction: column;
         gap: 0.6rem;
         background: linear-gradient(to bottom, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0) 100%);
+        transition: background var(--transition-quick), padding var(--transition-quick);
+    }
+
+    /* Hide top branding and clear fade background on mobile slides once started */
+    .app-container:not(.intro-active) .top-bar {
+        background: none;
+        padding-top: 0.75rem;
+        padding-bottom: 0.2rem;
+    }
+    
+    .app-container:not(.intro-active) .brand-info {
+        display: none;
     }
 
     .brand-info {
