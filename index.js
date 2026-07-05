@@ -454,11 +454,72 @@ document.addEventListener('DOMContentLoaded', () => {
        TRAFFIC & FUNNEL ANALYTICS TELEMETRY (Paid Traffic Funnel Optimization)
        ========================================================================== */
 
+    // Analytics Bucket ID (Public key-value store on kvdb.io)
+    const BUCKET_ID = 'ia_builder_analytics_eb00d9d';
+
+    // Initialize session telemetry on user entry
+    function getOrCreateSession() {
+        let sessionId = localStorage.getItem('iabuilder_session_id');
+        let sessionStart = localStorage.getItem('iabuilder_session_start');
+        
+        // Capture campaign parameters (UTMs and Ad Click IDs)
+        const urlParams = new URLSearchParams(window.location.search);
+        const utmSource = urlParams.get('utm_source') || 'Direct';
+        const utmMedium = urlParams.get('utm_medium') || '';
+        const utmCampaign = urlParams.get('utm_campaign') || '';
+        const adId = urlParams.get('gclid') || urlParams.get('fbclid') || '';
+
+        if (!sessionId) {
+            sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            sessionStart = Date.now();
+            localStorage.setItem('iabuilder_session_id', sessionId);
+            localStorage.setItem('iabuilder_session_start', sessionStart);
+            localStorage.setItem('iabuilder_utm_source', utmSource);
+            localStorage.setItem('iabuilder_utm_medium', utmMedium);
+            localStorage.setItem('iabuilder_utm_campaign', utmCampaign);
+            localStorage.setItem('iabuilder_ad_id', adId);
+            localStorage.setItem('iabuilder_referrer', document.referrer || 'None');
+        }
+
+        return {
+            id: sessionId,
+            start: parseInt(sessionStart),
+            utmSource: localStorage.getItem('iabuilder_utm_source'),
+            utmMedium: localStorage.getItem('iabuilder_utm_medium'),
+            utmCampaign: localStorage.getItem('iabuilder_utm_campaign'),
+            adId: localStorage.getItem('iabuilder_ad_id'),
+            referrer: localStorage.getItem('iabuilder_referrer')
+        };
+    }
+
     function trackSlideView(index) {
         const virtualUrl = index === 0 ? '/' : `/card-${index}`;
         const pageName = index === 0 ? 'Capa do Livro' : `Card ${String(index).padStart(2, '0')}`;
         
         console.log(`[Analytics] Tracked view: ${pageName} (${virtualUrl})`);
+
+        // Send telemetry payload to database (kvdb.io)
+        const session = getOrCreateSession();
+        const telemetryPayload = {
+            id: session.id,
+            startTime: session.start,
+            lastActive: Date.now(),
+            maxPage: index,
+            currentPage: index,
+            utmSource: session.utmSource,
+            utmMedium: session.utmMedium,
+            utmCampaign: session.utmCampaign,
+            adId: session.adId,
+            referrer: session.referrer,
+            device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'
+        };
+
+        // Fire background fetch to write logs (fails silently, no UI lock)
+        fetch(`https://kvdb.io/${BUCKET_ID}/session:${session.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(telemetryPayload)
+        }).catch(err => console.warn('Telemetry sync offline'));
 
         // 1. Google Analytics 4 (GA4) Page View Sinc
         if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
@@ -479,16 +540,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Meta (Facebook) Pixel Page View Sinc
         if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
-            // Envia um pageview customizado simulando mudança de página
             fbq('track', 'PageView', {}, { eventID: 'view_' + index });
-            
-            // Envia evento customizado para funil de tráfego pago
             fbq('trackCustom', 'CardView', {
                 cardIndex: index,
                 cardTitle: pageName
             });
 
-            // Dispara Lead/Conversão customizada ao chegar na metade ou no fim do livro
             if (index === Math.round(bookSlidesCount / 2)) {
                 fbq('trackCustom', 'MidBookReached', { content_name: 'Chegou na metade do Capítulo 1' });
             }
