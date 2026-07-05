@@ -1,0 +1,7 @@
+exclude:
+  - ROTEIRO.md
+  - node_modules
+  - package.json
+  - package-lock.json
+  - .agents
+  - README.md
