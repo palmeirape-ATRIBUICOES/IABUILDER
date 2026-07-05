@@ -246,6 +246,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             app.classList.remove('light-theme-active');
         }
+
+        // Update page counter badge
+        const pageCounter = document.getElementById('page-counter');
+        if (pageCounter) {
+            if (currentSlideIndex === 0) {
+                pageCounter.textContent = 'Capa';
+            } else {
+                const pageNum = String(currentSlideIndex).padStart(2, '0');
+                const totalPages = String(bookSlidesCount).padStart(2, '0');
+                pageCounter.textContent = `Página ${pageNum} / ${totalPages}`;
+            }
+        }
     }
 
     /* ==========================================================================

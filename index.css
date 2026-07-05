@@ -420,6 +420,24 @@ body, html {
     pointer-events: auto;
 }
 
+/* Page counter badge */
+.page-counter {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    white-space: nowrap;
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease, background 0.3s ease;
+}
+
 .progress-indicator {
     height: 3px;
     flex-grow: 1;
@@ -822,6 +840,11 @@ body, html {
 }
 .light-theme-active .top-bar .volume-title {
     color: rgba(28, 28, 30, 0.6);
+}
+.light-theme-active .page-counter {
+    color: rgba(28, 28, 30, 0.85);
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.12);
 }
 .light-theme-active .progress-indicator {
     background-color: rgba(0, 0, 0, 0.1);
