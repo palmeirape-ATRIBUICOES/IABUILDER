@@ -368,6 +368,7 @@
         function checkPass() {
             const password = document.getElementById('admin-pass').value;
             if (password === 'builder2026') {
+                localStorage.setItem('admin_authenticated', 'true');
                 document.getElementById('login-screen').style.display = 'none';
                 // Fetch data once entered
                 fetchAnalyticsData();
@@ -375,6 +376,17 @@
                 document.getElementById('login-error').style.display = 'block';
             }
         }
+
+        // Auto login on load if session exists
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('admin_authenticated') === 'true') {
+                const loginScreen = document.getElementById('login-screen');
+                if (loginScreen) {
+                    loginScreen.style.display = 'none';
+                }
+                fetchAnalyticsData();
+            }
+        });
 
         // Allow entering by pressing enter key
         document.getElementById('admin-pass').addEventListener('keypress', function(e) {

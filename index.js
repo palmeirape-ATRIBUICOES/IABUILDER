@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     app.classList.add('intro-active'); // Ensure intro class is present on load
     initProgressIndicators();
     updateNavigationState();
+    trackSlideView(0);
 
     // Mobile Web Audio API Unlock Helper
     const unlockAudio = () => {
