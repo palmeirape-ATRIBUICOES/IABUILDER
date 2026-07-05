@@ -42,6 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let osc1 = null, osc2 = null, oscSub = null;
     let lfo = null, filter = null;
 
+    // Narration Audio State (Narrator Voice Track)
+    const narratorAudio = document.getElementById('narrator-audio');
+    const narrationToggleBtn = document.getElementById('narration-toggle');
+    const narrationPlayPauseBtn = document.getElementById('narration-play-pause');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    
+    let isNarrationActive = false;
+    let isNarrationPlaying = false;
+    let cardDuration = 15; // Estimated duration per card (will be calculated dynamically)
+
     // Initialize App
     app.classList.add('intro-active'); // Ensure intro class is present on load
     initProgressIndicators();
@@ -73,6 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
     soundToggleBtn.addEventListener('click', toggleAudio);
     autoplayToggleBtn.addEventListener('click', toggleAutoplay);
     fullscreenToggleBtn.addEventListener('click', toggleFullscreen);
+    
+    // Narration Event Listeners
+    narrationToggleBtn.addEventListener('click', toggleNarration);
+    narrationPlayPauseBtn.addEventListener('click', toggleNarrationPlayback);
+    narratorAudio.addEventListener('loadedmetadata', onNarrationMetadataLoaded);
+    narratorAudio.addEventListener('timeupdate', onNarrationTimeUpdate);
+    narratorAudio.addEventListener('ended', onNarrationEnded);
 
     // Touch Swipe detection
     app.addEventListener('touchstart', (e) => {
@@ -177,8 +195,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update App Classes
         if (currentSlideIndex === 0) {
             app.classList.add('intro-active');
+            // Stop narration if on cover
+            if (isNarrationPlaying) {
+                pauseNarration();
+            }
         } else {
             app.classList.remove('intro-active');
+            
+            // Sync Narration Time if active
+            if (isNarrationActive && narratorAudio && narratorAudio.duration) {
+                const targetTime = (currentSlideIndex - 1) * cardDuration;
+                // Avoid tiny infinite loops of timeupdate
+                if (Math.abs(narratorAudio.currentTime - targetTime) > 2) {
+                    narratorAudio.currentTime = targetTime;
+                }
+            }
         }
 
         updateNavigationState();
@@ -445,5 +476,100 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             document.exitFullscreen();
         }
+    }
+
+    /* ==========================================================================
+       Narration Voicetrack Management (Kling/NotebookLM Audio Sinc)
+       ========================================================================== */
+
+    function toggleNarration() {
+        isNarrationActive = !isNarrationActive;
+        
+        if (isNarrationActive) {
+            narrationToggleBtn.textContent = 'Voz: ON';
+            narrationToggleBtn.classList.add('active');
+            narrationPlayPauseBtn.style.display = 'inline-flex';
+            
+            // Auto play if already started reading
+            if (currentSlideIndex > 0) {
+                // Ensure ambient synth goes low (ducking effect)
+                if (isPlayingAudio && masterGain) {
+                    masterGain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 1.0);
+                }
+                playNarration();
+            }
+        } else {
+            narrationToggleBtn.textContent = 'Voz: OFF';
+            narrationToggleBtn.classList.remove('active');
+            narrationPlayPauseBtn.style.display = 'none';
+            pauseNarration();
+            
+            // Restore ambient synth volume to full
+            if (isPlayingAudio && masterGain) {
+                masterGain.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + 1.0);
+            }
+        }
+    }
+
+    function toggleNarrationPlayback() {
+        if (isNarrationPlaying) {
+            pauseNarration();
+        } else {
+            playNarration();
+        }
+    }
+
+    function playNarration() {
+        if (!narratorAudio) return;
+        
+        // Sync starting time to current slide if just starting
+        if (narratorAudio.duration) {
+            const targetTime = (currentSlideIndex - 1) * cardDuration;
+            if (Math.abs(narratorAudio.currentTime - targetTime) > 3) {
+                narratorAudio.currentTime = targetTime >= 0 ? targetTime : 0;
+            }
+        }
+
+        narratorAudio.play().then(() => {
+            isNarrationPlaying = true;
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'block';
+            narrationPlayPauseBtn.classList.add('playing');
+        }).catch(err => {
+            console.error('Falha ao reproduzir áudio da narração:', err.message);
+        });
+    }
+
+    function pauseNarration() {
+        if (!narratorAudio) return;
+        narratorAudio.pause();
+        isNarrationPlaying = false;
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        narrationPlayPauseBtn.classList.remove('playing');
+    }
+
+    function onNarrationMetadataLoaded() {
+        if (narratorAudio.duration) {
+            cardDuration = narratorAudio.duration / bookSlidesCount;
+            console.log(`Narração carregada. Duração total: ${narratorAudio.duration}s. Fatias por card: ${cardDuration}s`);
+        }
+    }
+
+    function onNarrationTimeUpdate() {
+        if (!isNarrationActive || !narratorAudio.duration) return;
+        
+        // Calculate the card that matches the current timestamp of the audio
+        const currentProgressCard = Math.floor(narratorAudio.currentTime / cardDuration) + 1;
+        
+        // Auto navigate if the audio has advanced past the current card threshold
+        if (currentProgressCard > 0 && currentProgressCard <= bookSlidesCount && currentProgressCard !== currentSlideIndex) {
+            goToSlide(currentProgressCard);
+        }
+    }
+
+    function onNarrationEnded() {
+        pauseNarration();
+        goToSlide(0); // Return to cover when narrative is over
     }
 });
