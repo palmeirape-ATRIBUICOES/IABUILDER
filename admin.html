@@ -293,6 +293,7 @@
     <!-- Main Dashboard -->
     <div class="header">
         <h1>IA BUILDER™ <span>Analytics</span></h1>
+        <button class="btn-refresh" onclick="fetchAnalyticsData()">Atualizar Dados</button>
     </div>
 
     <!-- KPI Grid -->
@@ -310,12 +311,7 @@
         <div class="kpi-card">
             <span class="kpi-label">Leitura Concluída</span>
             <span class="kpi-value" id="kpi-conversions">0</span>
-            <span class="kpi-sub" id="kpi-conv-rate">0% de conversão (Card 87)</span>
-        </div>
-        <div class="kpi-card">
-            <span class="kpi-label">Inscritos (Leads)</span>
-            <span class="kpi-value" id="kpi-leads">0</span>
-            <span class="kpi-sub" id="kpi-lead-rate">0% de conv. inscritos</span>
+            <span class="kpi-sub" id="kpi-conv-rate">0% de conversão (Fim (Card 68))</span>
         </div>
         <div class="kpi-card">
             <span class="kpi-label">Acesso via Celular</span>
@@ -340,31 +336,6 @@
         </div>
     </div>
 
-    <!-- Leads Registration Table -->
-    <div class="table-panel" style="margin-bottom: 2rem;">
-        <div class="panel-title">
-            Leads Cadastrados (Inscritos no Workshop)
-            <button id="btn-export-csv" class="btn-refresh" style="background: var(--text-primary); color: var(--bg-black); font-size: 0.8rem;" onclick="exportLeadsToCSV()">Exportar Leads CSV</button>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome Completo</th>
-                    <th>Email</th>
-                    <th>WhatsApp</th>
-                    <th>Data/Hora Cadastro</th>
-                    <th>Origem / UTM</th>
-                    <th>Dispositivo</th>
-                </tr>
-            </thead>
-            <tbody id="lead-table-body">
-                <tr>
-                    <td colspan="6" style="text-align: center; color: var(--text-secondary);">Nenhum lead inscrito no workshop ainda.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
     <!-- Session Log Table -->
     <div class="table-panel">
         <div class="panel-title">Tráfego de Sessões Recentes <span>Últimos acessos de tráfego pago</span></div>
@@ -384,10 +355,11 @@
                     <td colspan="6" style="text-align: center; color: var(--text-secondary);">Carregando dados da telemetria...</td>
                 </tr>
             </tbody>
+        </table>
     </div>
 
     <script>
-        const BUCKET_ID = 'NbpUd2gxH9Ss93y3hCGeFV';
+        const BUCKET_ID = 'ia_builder_analytics_eb00d9d';
         let funnelChartInstance = null;
         let dropoffChartInstance = null;
 
@@ -413,19 +385,18 @@
         // Fetch logs from kvdb.io public key-value store
         async function fetchAnalyticsData() {
             try {
-                const response = await fetch(`https://kvdb.io/${BUCKET_ID}/?prefix=session:&values=true&format=json`);
+                const response = await fetch('https://iabuilder-8a7e7-default-rtdb.firebaseio.com/sessions.json');
                 if (!response.ok) {
-                    throw new Error('Falha ao conectar com o banco de dados.');
+                    throw new Error('Falha ao conectar com o banco de dados Firebase.');
                 }
-                const data = await response.json(); // Array of [key, valueString]
+                const db = await response.json() || {};
+                const data = Object.entries(db).map(([key, val]) => [key, JSON.stringify(val)]);
                 processAnalytics(data);
             } catch (err) {
                 console.error(err);
                 alert('Erro ao carregar telemetria de tráfego. Tente novamente em alguns segundos.');
             }
         }
-
-        let leadsList = []; // Global list to store extracted leads for CSV export
 
         function processAnalytics(rows) {
             const sessions = rows.map(row => JSON.parse(row[1]));
@@ -436,70 +407,21 @@
             const activeThreshold = 5 * 60 * 1000; // 5 minutes
             
             const activeSessions = sessions.filter(s => (now - s.lastActive) < activeThreshold);
-            const conversionSessions = sessions.filter(s => s.maxPage >= 87);
+            const conversionSessions = sessions.filter(s => s.maxPage >= 68);
             const conversionRate = totalSessions > 0 ? ((conversionSessions.length / totalSessions) * 100).toFixed(1) : 0;
             
-            // Extract Leads list
-            leadsList = [];
-            sessions.forEach(s => {
-                if (s.lead) {
-                    leadsList.push({
-                        name: s.lead.name,
-                        email: s.lead.email,
-                        whatsapp: s.lead.whatsapp,
-                        registeredAt: s.lead.registeredAt,
-                        utmSource: s.utmSource || 'Direct',
-                        utmCampaign: s.utmCampaign || '',
-                        device: s.device || 'Desktop'
-                    });
-                }
-            });
-            // Sort leads newest first
-            leadsList.sort((a, b) => b.registeredAt - a.registeredAt);
-
-            const leadsCount = leadsList.length;
-            const leadRate = totalSessions > 0 ? ((leadsCount / totalSessions) * 100).toFixed(1) : 0;
-
             const mobileSessions = sessions.filter(s => s.device === 'Mobile');
             const mobileRate = totalSessions > 0 ? ((mobileSessions.length / totalSessions) * 100).toFixed(1) : 0;
 
             document.getElementById('kpi-visitors').textContent = totalSessions;
             document.getElementById('kpi-active').textContent = activeSessions.length;
             document.getElementById('kpi-conversions').textContent = conversionSessions.length;
-            document.getElementById('kpi-conv-rate').textContent = `${conversionRate}% de conversão (Card 87)`;
-            document.getElementById('kpi-leads').textContent = leadsCount;
-            document.getElementById('kpi-lead-rate').textContent = `${leadRate}% de conv. inscritos`;
+            document.getElementById('kpi-conv-rate').textContent = `${conversionRate}% de conversão (Fim (Card 68))`;
             document.getElementById('kpi-mobile').textContent = `${mobileRate}%`;
 
-            // Populate Leads Table
-            const leadTableBody = document.getElementById('lead-table-body');
-            leadTableBody.innerHTML = '';
-            if (leadsList.length === 0) {
-                leadTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Nenhum lead inscrito no workshop ainda.</td></tr>`;
-            } else {
-                leadsList.forEach(lead => {
-                    const tr = document.createElement('tr');
-                    const date = new Date(lead.registeredAt);
-                    const dateTimeString = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                    const utmDisplay = lead.utmSource !== 'Direct' 
-                        ? `<span style="color: var(--accent-blue); font-weight:600;">${lead.utmSource}</span> / ${lead.utmCampaign || 'Sem Campanha'}`
-                        : `<span style="color: var(--text-secondary)">Tráfego Direto</span>`;
-
-                    tr.innerHTML = `
-                        <td style="font-weight:600;">${lead.name}</td>
-                        <td>${lead.email}</td>
-                        <td style="font-family:monospace;">${lead.whatsapp}</td>
-                        <td>${dateTimeString}</td>
-                        <td>${utmDisplay}</td>
-                        <td><span class="badge badge-device">${lead.device}</span></td>
-                    `;
-                    leadTableBody.appendChild(tr);
-                });
-            }
-
-            // 2. Funnel Data (Capa, Card 1, Card 10, Card 20, Card 30, Card 40, Card 50, Card 60, Card 65, Card 70, Card 75, Card 80, Card 85, Card 87)
-            const funnelMilestones = [0, 1, 10, 20, 30, 40, 50, 60, 65, 70, 75, 80, 85, 87];
-            const funnelLabels = ['Capa', 'Card 1', 'Card 10', 'Card 20', 'Card 30', 'Card 40', 'Card 50', 'Card 60', 'Card 65', 'Card 70', 'Card 75', 'Card 80', 'Card 85', 'Card 87 (Fim)'];
+            // 2. Funnel Data (Capa, Card 1, Card 10, Card 20, Card 30, Card 40, Card 50, Fim (Card 68))
+            const funnelMilestones = [0, 1, 10, 20, 30, 40, 50, 68];
+            const funnelLabels = ['Capa', 'Card 1', 'Card 10', 'Card 20', 'Card 30', 'Card 40', 'Card 50', 'Fim (Card 68) (Fim)'];
             const funnelValues = funnelMilestones.map(m => {
                 // Count how many users reached at least this page
                 return sessions.filter(s => s.maxPage >= m).length;
@@ -510,7 +432,7 @@
             const inactiveSessions = sessions.filter(s => (now - s.lastActive) >= activeThreshold);
             const dropoffCounts = {};
             // Initialize exit card counts for milestones
-            for(let i=0; i<=87; i++) {
+            for(let i=0; i<=70; i++) {
                 dropoffCounts[i] = 0;
             }
             inactiveSessions.forEach(s => {
@@ -520,7 +442,7 @@
             // Get top exit cards for chart (filtering cards with exits)
             const exitLabels = [];
             const exitValues = [];
-            for (let i = 0; i <= 87; i++) {
+            for (let i = 0; i <= 70; i++) {
                 if (dropoffCounts[i] > 0) {
                     exitLabels.push(i === 0 ? 'Capa' : `Card ${i}`);
                     exitValues.push(dropoffCounts[i]);
@@ -661,40 +583,6 @@
                     }
                 }
             });
-        }
-
-        // Export Leads list to CSV format for CRM/Spreadsheet import
-        function exportLeadsToCSV() {
-            if (leadsList.length === 0) {
-                alert('Não há leads cadastrados para exportar.');
-                return;
-            }
-            
-            // Build CSV rows
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Include BOM for proper UTF-8 Excel parsing
-            csvContent += "Nome,Email,WhatsApp,Data de Cadastro,Origem UTM,Campanha,Dispositivo\n";
-            
-            leadsList.forEach(lead => {
-                const date = new Date(lead.registeredAt);
-                const dateTimeString = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
-                // Escape commas and double quotes to ensure clean CSV columns
-                const nameEscaped = `"${lead.name.replace(/"/g, '""')}"`;
-                const emailEscaped = `"${lead.email.replace(/"/g, '""')}"`;
-                const phoneEscaped = `"${lead.whatsapp.replace(/"/g, '""')}"`;
-                const utmSourceEscaped = `"${lead.utmSource.replace(/"/g, '""')}"`;
-                const utmCampaignEscaped = `"${lead.utmCampaign.replace(/"/g, '""')}"`;
-                
-                csvContent += `${nameEscaped},${emailEscaped},${phoneEscaped},${dateTimeString},${utmSourceEscaped},${utmCampaignEscaped},${lead.device}\n`;
-            });
-            
-            // Trigger browser download dialog
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `iabuilder_leads_${new Date().toISOString().slice(0, 10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
     </script>
 </body>
