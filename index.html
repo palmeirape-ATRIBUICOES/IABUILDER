@@ -1299,95 +1299,59 @@
 
             <!-- Tela Final da Experiência (Página 88) -->
             <section class="slide" id="slide-final" data-type="final-screen">
-                <div class="final-container">
-                    
-                    <!-- Content View (Form state) -->
-                    <div id="final-form-view" style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
-                        <h1 class="final-title">Se você chegou até aqui...</h1>
-                        
-                        <div class="final-text animate-text">
-                            <p>Parabéns.</p>
-                            <p>A maioria das pessoas nunca termina aquilo que começa. Você terminou.</p>
-                            <p>Isso significa que provavelmente não está procurando apenas mais um conteúdo sobre Inteligência Artificial. Você está procurando uma maneira de transformar ideias em projetos reais.</p>
-                            <p>Foi exatamente por isso que resolvi fazer algo diferente.</p>
-                        </div>
-
-                        <div class="highlight-box animate-text delay-1">
-                            <div class="highlight-title">Quero fazer um convite.</div>
-                            <p class="final-text">Nos próximos dias vou realizar um <strong>Workshop Prático ao Vivo</strong>, totalmente gratuito.</p>
-                        </div>
-
-                        <div class="final-text animate-text delay-2">
-                            <p>Durante esse workshop eu não vou apresentar slides. Não vou fazer uma aula teórica.</p>
-                            <p>Vou abrir meu computador e construir um projeto real do zero utilizando Inteligência Artificial. Você acompanhará exatamente como penso. Como estruturo uma ideia. Como transformo essa ideia em um produto digital. Como utilizo as ferramentas. Quais erros evito. Quais decisões tomo durante o desenvolvimento.</p>
-                            <p>Você verá o processo exatamente como acontece. Sem cortes. Sem esconder dificuldades. Sem apresentações prontas. Será um projeto criado ao vivo.</p>
-                        </div>
-
-                        <!-- Card Visual -->
-                        <div class="workshop-card animate-text delay-3">
-                            <div class="workshop-item">
-                                <span class="workshop-check">✓</span>
-                                <span>Workshop 100% gratuito</span>
-                            </div>
-                            <div class="workshop-item">
-                                <span class="workshop-check">✓</span>
-                                <span>Projeto criado ao vivo</span>
-                            </div>
-                            <div class="workshop-item">
-                                <span class="workshop-check">✓</span>
-                                <span>Demonstração completa do processo</span>
-                            </div>
-                            <div class="workshop-item">
-                                <span class="workshop-check">✓</span>
-                                <span>Perguntas e respostas ao final</span>
-                            </div>
-                            <div class="workshop-item">
-                                <span class="workshop-check">✓</span>
-                                <span>Vagas limitadas para manter a qualidade da interação</span>
-                            </div>
-                        </div>
-
-                        <!-- Formulário de Inscrição -->
-                        <div class="lead-form-container animate-text delay-3">
-                            <h2 class="form-title">Reserve sua vaga gratuitamente</h2>
-                            <form id="lead-form" onsubmit="return false;">
-                                <div class="form-group">
-                                    <label class="form-label" for="lead-name">Nome completo</label>
-                                    <input type="text" id="lead-name" class="form-input" placeholder="Digite seu nome completo" required autocomplete="name">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="lead-email">Email corporativo ou pessoal</label>
-                                    <input type="email" id="lead-email" class="form-input" placeholder="Digite seu melhor email" required autocomplete="email">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="lead-phone">WhatsApp</label>
-                                    <input type="tel" id="lead-phone" class="form-input" placeholder="(00) 00000-0000" required>
-                                </div>
-                                <button type="submit" id="btn-submit-lead" class="btn-submit">
-                                    Quero participar do Workshop
-                                </button>
-                                <p class="form-footer-text">
-                                    Nenhum spam. Seus dados serão utilizados exclusivamente para enviar a data, o link da transmissão e os materiais relacionados ao Workshop.
-                                </p>
-                            </form>
-                        </div>
+                <div class="final-container animate-text">
+                    <h1 class="final-title">Se você chegou até aqui...</h1>
+                    <div class="final-text">
+                        <p>Você concluiu a jornada do Volume 1.</p>
+                        <p>Isso significa que você faz parte da minoria que termina o que começa e busca transformar ideias em soluções reais.</p>
+                        <p>Nos próximos dias, vou realizar um <strong>Workshop Prático ao Vivo e Gratuito</strong>. Vou abrir meu computador e construir um projeto real do zero, sem slides e sem segredos.</p>
                     </div>
-
-                    <!-- Success State View (Hidden by default) -->
-                    <div id="final-success-view" class="success-state">
-                        <div class="success-icon">✓</div>
-                        <h2 class="success-title">Sua vaga foi reservada.</h2>
-                        <div class="success-message">
-                            <p>Assim que a data for definida, você receberá todas as informações por email e WhatsApp.</p>
-                            <p>Enquanto isso...</p>
-                            <p><strong>Continue observando os problemas ao seu redor.</strong></p>
-                            <p>Grandes empresas normalmente nascem da solução de pequenos problemas. Talvez a próxima grande oportunidade já esteja diante de você.</p>
-                        </div>
-                    </div>
-
+                    <button class="btn-cta-final" id="btn-open-modal">Quero Participar do Workshop</button>
                 </div>
             </section>
 
+        </div>
+
+        <!-- Modal Popup para Inscrição (Celular/Desktop) -->
+        <div id="lead-modal" class="modal-backdrop">
+            <div class="modal-content">
+                <button class="modal-close-btn" id="btn-close-modal" aria-label="Fechar">&times;</button>
+                
+                <!-- Formulário de Inscrição -->
+                <div id="final-form-view" class="lead-form-container">
+                    <h2 class="form-title">Garanta sua vaga gratuitamente</h2>
+                    <form id="lead-form" onsubmit="return false;">
+                        <div class="form-group">
+                            <label class="form-label" for="lead-name">Nome completo</label>
+                            <input type="text" id="lead-name" class="form-input" placeholder="Digite seu nome completo" required autocomplete="name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="lead-email">Email</label>
+                            <input type="email" id="lead-email" class="form-input" placeholder="Digite seu melhor email" required autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="lead-phone">WhatsApp</label>
+                            <input type="tel" id="lead-phone" class="form-input" placeholder="(00) 00000-0000" required>
+                        </div>
+                        <button type="submit" id="btn-submit-lead" class="btn-submit">
+                            Confirmar Minha Vaga
+                        </button>
+                        <p class="form-footer-text">
+                            Nenhum spam. Seus dados serão usados apenas para enviar o link da transmissão do Workshop.
+                        </p>
+                    </form>
+                </div>
+
+                <!-- Success State View (Hidden by default) -->
+                <div id="final-success-view" class="success-state">
+                    <div class="success-icon">✓</div>
+                    <h2 class="success-title">Vaga reservada!</h2>
+                    <div class="success-message">
+                        <p>Assim que a data for definida, você receberá o link por email e WhatsApp.</p>
+                        <p>Até breve no Workshop ao Vivo.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Navigation Buttons -->

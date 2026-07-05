@@ -576,9 +576,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // WORKSHOP REGISTRATION FORM HANDLER
+    // WORKSHOP MODAL & REGISTRATION FORM HANDLER
     // ==========================================================================
+    const leadModal = document.getElementById('lead-modal');
+    const btnOpenModal = document.getElementById('btn-open-modal');
+    const btnCloseModal = document.getElementById('btn-close-modal');
     const leadForm = document.getElementById('lead-form');
+
+    // Open Modal
+    if (btnOpenModal && leadModal) {
+        // If already registered, update CTA button text
+        if (localStorage.getItem('iabuilder_lead_registered') === 'true') {
+            btnOpenModal.textContent = 'Sua Vaga está Reservada!';
+            btnOpenModal.style.borderColor = '#10b981';
+            btnOpenModal.style.color = '#10b981';
+        }
+
+        btnOpenModal.addEventListener('click', () => {
+            leadModal.style.display = 'flex';
+            // Force reflow for CSS transition
+            leadModal.offsetHeight;
+            leadModal.classList.add('active');
+
+            // If already registered, skip form and display success view
+            if (localStorage.getItem('iabuilder_lead_registered') === 'true') {
+                const formView = document.getElementById('final-form-view');
+                const successView = document.getElementById('final-success-view');
+                if (formView && successView) {
+                    formView.style.display = 'none';
+                    successView.style.display = 'flex';
+                }
+            }
+        });
+    }
+
+    // Close Modal
+    const closeModal = () => {
+        if (leadModal) {
+            leadModal.classList.remove('active');
+            setTimeout(() => {
+                leadModal.style.display = 'none';
+            }, 300); // Wait for transition animation
+        }
+    };
+
+    if (btnCloseModal) {
+        btnCloseModal.addEventListener('click', closeModal);
+    }
+
+    // Close on clicking backdrop outside content card
+    if (leadModal) {
+        leadModal.addEventListener('click', (e) => {
+            if (e.target === leadModal) {
+                closeModal();
+            }
+        });
+    }
+
     if (leadForm) {
         leadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -590,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Disable form and show loading
             btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Enviando...';
+            btnSubmit.textContent = 'Reservando...';
 
             const leadData = {
                 name: nameInput.value.trim(),
@@ -631,6 +685,13 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('iabuilder_lead_registered', 'true');
             localStorage.setItem('iabuilder_lead_name', leadData.name);
 
+            // Update CTA button on slide
+            if (btnOpenModal) {
+                btnOpenModal.textContent = 'Sua Vaga está Reservada!';
+                btnOpenModal.style.borderColor = '#10b981';
+                btnOpenModal.style.color = '#10b981';
+            }
+
             // 1. Fire Google Analytics 4 Sign Up event
             if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
                 gtag('event', 'sign_up', {
@@ -659,12 +720,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (formView && successView) {
                 formView.style.display = 'none';
                 successView.style.display = 'flex';
-                
-                // Scroll container to top of screen on mobile to show the success mark
-                const slideFinal = document.getElementById('slide-final');
-                if (slideFinal) {
-                    slideFinal.scrollTop = 0;
-                }
             }
         });
     }
