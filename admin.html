@@ -347,12 +347,13 @@
                     <th>Dispositivo</th>
                     <th>Pág. Máxima</th>
                     <th>Última Ação</th>
+                    <th>Cadastro de Vaga (Lead)</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody id="session-table-body">
                 <tr>
-                    <td colspan="6" style="text-align: center; color: var(--text-secondary);">Carregando dados da telemetria...</td>
+                    <td colspan="7" style="text-align: center; color: var(--text-secondary);">Carregando dados da telemetria...</td>
                 </tr>
             </tbody>
         </table>
@@ -485,12 +486,23 @@
                     ? `<span style="color: var(--accent-blue); font-weight:600;">${s.utmSource}</span> / ${s.utmCampaign || 'Sem Campanha'}`
                     : `<span style="color: var(--text-secondary)">Tráfego Direto / Orgânico</span>`;
 
+                // Formatação do Lead
+                let leadCell = '<span style="color: var(--text-secondary); font-style: italic; font-size: 0.8rem;">Nenhum cadastro</span>';
+                if (s.lead) {
+                    leadCell = `<div style="line-height:1.3; padding: 2px 0;">
+                        <strong style="color: #10b981; font-size: 0.85rem;">${s.lead.name}</strong><br/>
+                        <span style="font-size:0.75rem; color: var(--text-secondary);">${s.lead.email}</span><br/>
+                        <a href="https://wa.me/${s.lead.whatsapp.replace(/\\D/g, '')}" target="_blank" style="font-size:0.75rem; color: #10b981; text-decoration: none; font-weight: 600;">📞 ${s.lead.whatsapp}</a>
+                    </div>`;
+                }
+
                 tr.innerHTML = `
                     <td style="font-family: monospace; font-size:0.8rem; color: var(--text-secondary);">${s.id.substring(5, 14)}...</td>
                     <td>${origin}</td>
                     <td><span class="badge badge-device">${s.device}</span></td>
                     <td style="font-weight: 600; text-align:center;">Card ${s.maxPage}</td>
                     <td>Há ${Math.round((now - s.lastActive) / 1000 / 60)} min (${timeString})</td>
+                    <td>${leadCell}</td>
                     <td>${statusBadge}</td>
                 `;
                 tableBody.appendChild(tr);
