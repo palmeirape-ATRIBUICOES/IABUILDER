@@ -799,13 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const premiumWhatsappError = document.getElementById('premium-whatsapp-error');
     
     const premiumWhatsappView = document.getElementById('premium-whatsapp-view');
-    const premiumPixView = document.getElementById('premium-pix-view');
-    const premiumPixQr = document.getElementById('premium-pix-qr');
-    const qrLoadingSpinner = document.getElementById('qr-loading-spinner');
-    
     const btnGeneratePix = document.getElementById('btn-generate-pix');
-    const btnCopyPix = document.getElementById('btn-copy-pix');
-    const btnCancelPix = document.getElementById('btn-cancel-pix');
     
     const premiumRegisterModal = document.getElementById('premium-register-modal');
     const premiumRegisterForm = document.getElementById('premium-register-form');
@@ -814,23 +808,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const premiumRegPhone = document.getElementById('premium-reg-phone');
     const btnSubmitPremiumRegister = document.getElementById('btn-submit-premium-register');
 
-    let pixCodeString = '';
-    let statusInterval = null;
-
     function openPremiumModal() {
         if (!premiumPaymentModal) return;
         premiumPaymentModal.style.display = 'flex';
         premiumPaymentModal.offsetHeight;
         premiumPaymentModal.classList.add('active');
         
-        // Reset to first view
-        premiumWhatsappView.style.display = 'block';
-        premiumPixView.style.display = 'none';
         premiumWhatsappInput.value = '';
         premiumWhatsappError.textContent = '';
         premiumWhatsappError.classList.remove('active');
         btnGeneratePix.disabled = false;
-        btnGeneratePix.textContent = 'GERAR QR CODE PIX';
+        btnGeneratePix.textContent = 'IR PARA O PAGAMENTO (PIX/CARTÃO) 💳';
     }
 
     function closePremiumModal() {
@@ -839,7 +827,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             premiumPaymentModal.style.display = 'none';
         }, 300);
-        clearInterval(statusInterval);
     }
 
     if (btnClosePremiumModal) {
@@ -855,12 +842,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (val.length <= 7) {
                 e.target.value = `(${val.slice(0, 2)}) ${val.slice(2)}`;
             } else {
-                e.target.value = `(${val.slice(0, 2)}) ${val.slice(2, 7)}-${val.slice(7, 11)}`;
+                e.target.value = `(${val.slice(0, 2)}) ${val.slice(2, 7)}-\$${val.slice(7, 11)}`.replace('$\$', '$');
             }
         });
     }
 
-    // Submit WhatsApp to generate Pix
+    // Submit WhatsApp to redirect to checkout preference
     if (premiumWhatsappForm) {
         premiumWhatsappForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -874,10 +861,9 @@ document.addEventListener('DOMContentLoaded', () => {
             premiumWhatsappError.textContent = '';
             premiumWhatsappError.classList.remove('active');
             btnGeneratePix.disabled = true;
-            btnGeneratePix.textContent = 'GERANDO PIX...';
+            btnGeneratePix.textContent = 'REDIRECIONANDO...';
 
             try {
-                // Call our Vercel Serverless Function to generate Pix
                 const response = await fetch('/api/payment/pix', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -885,92 +871,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const data = await response.json();
-                if (data.success) {
-                    pixCodeString = data.pixCode;
-                    premiumPixQr.src = `data:image/png;base64,${data.qrCodeBase64}`;
-                    
-                    // Show QR Code and hide spinner once loaded
-                    premiumPixQr.onload = () => {
-                        qrLoadingSpinner.style.display = 'none';
-                        premiumPixQr.style.display = 'block';
-                    };
-
-                    premiumWhatsappView.style.display = 'none';
-                    premiumPixView.style.display = 'block';
-                    
-                    // Track Pix Generation
+                if (data.success && data.initPoint) {
+                    // Track Pix/Checkout initiation
                     if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
-                        gtag('event', 'generate_pix', { amount: 97.00 });
+                        gtag('event', 'begin_checkout', { value: 97.00, currency: 'BRL' });
                     }
                     if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
-                        fbq('trackCustom', 'GeneratePix', { amount: 97.00 });
+                        fbq('track', 'InitiateCheckout', { value: 97.00, currency: 'BRL' });
                     }
 
-                    // Start polling status
-                    startPollingPayment(phone);
+                    // Redirect user to Mercado Pago secure checkout
+                    window.location.href = data.initPoint;
 
                 } else {
-                    throw new Error(data.error || 'Erro ao gerar o PIX.');
+                    throw new Error(data.error || 'Erro ao gerar o checkout de pagamento.');
                 }
             } catch (err) {
                 console.error(err);
                 premiumWhatsappError.textContent = err.message || 'Erro de conexão com o gateway. Tente novamente.';
                 premiumWhatsappError.classList.add('active');
                 btnGeneratePix.disabled = false;
-                btnGeneratePix.textContent = 'GERAR QR CODE PIX';
+                btnGeneratePix.textContent = 'IR PARA O PAGAMENTO (PIX/CARTÃO) 💳';
             }
         });
     }
 
-    // Copy Pix code to clipboard
-    if (btnCopyPix) {
-        btnCopyPix.addEventListener('click', () => {
-            if (pixCodeString) {
-                navigator.clipboard.writeText(pixCodeString).then(() => {
-                    const originalText = btnCopyPix.textContent;
-                    btnCopyPix.textContent = 'CÓDIGO COPIADO! ✅';
-                    btnCopyPix.style.borderColor = '#10b981';
-                    btnCopyPix.style.color = '#10b981';
-                    setTimeout(() => {
-                        btnCopyPix.textContent = originalText;
-                        btnCopyPix.style.borderColor = '#d4af37';
-                        btnCopyPix.style.color = '#d4af37';
-                    }, 2000);
-                });
-            }
-        });
-    }
-
-    if (btnCancelPix) {
-        btnCancelPix.addEventListener('click', () => {
-            clearInterval(statusInterval);
-            premiumPixView.style.display = 'none';
-            premiumWhatsappView.style.display = 'block';
-            btnGeneratePix.disabled = false;
-            btnGeneratePix.textContent = 'GERAR QR CODE PIX';
-            qrLoadingSpinner.style.display = 'block';
-            premiumPixQr.style.display = 'none';
-        });
-    }
-
-    // Status polling loop
-    function startPollingPayment(phone) {
-        clearInterval(statusInterval);
-        statusInterval = setInterval(async () => {
-            try {
-                const response = await fetch(`/api/payment/status?whatsapp=${phone}`);
-                const data = await response.json();
-                if (data.success && data.paid) {
-                    clearInterval(statusInterval);
-                    handlePaymentApproved(phone);
-                }
-            } catch (err) {
-                console.warn('Status poll offline', err);
-            }
-        }, 4000);
-    }
-
-    // Handle payment approved
+    // Handle payment approved callback from Checkout redirect
     function handlePaymentApproved(phone) {
         localStorage.setItem('iabuilder_premium_active', 'true');
         
@@ -981,9 +907,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
             fbq('track', 'Purchase', { value: 97.00, currency: 'BRL' });
         }
-
-        // Close payment modal
-        closePremiumModal();
 
         // Open registration details modal
         if (premiumRegisterModal) {
@@ -1021,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Erro ao salvar dados de registro.');
                 }
 
-                // Close modal and navigate forward
+                // Close modal
                 premiumRegisterModal.classList.remove('active');
                 setTimeout(() => {
                     premiumRegisterModal.style.display = 'none';
@@ -1037,6 +960,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnSubmitPremiumRegister.textContent = 'LIBERAR PRÓXIMOS CARDS 🚀';
             }
         });
+    }
+
+    // Check query parameters for success callback on page load
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment_success') === 'true' && urlParams.get('whatsapp')) {
+        const whatsappVal = urlParams.get('whatsapp');
+        
+        // Clean URL to keep it pretty
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        handlePaymentApproved(whatsappVal);
     }
 
 });
