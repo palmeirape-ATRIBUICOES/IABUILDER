@@ -116,11 +116,15 @@
                 <div class="cover-content">
                     <div class="cover-brand">IA BUILDER™</div>
                     <div class="cover-volume">VOLUME 1</div>
-                    <h1 class="cover-title">A MAIOR OPORTUNIDADE<br>DA NOSSA GERAÇÃO</h1>
-                    <p class="cover-subtitle">Documento Mestre · Capítulo 1</p>
+                    <h1 class="cover-title">WORKSHOP GRATUITO<br>IA BUILDER™</h1>
+                    <p class="cover-subtitle">Construa um projeto real com IA, mesmo sem saber programar</p>
+                    <p class="cover-offer">
+                        Uma aula prática ao vivo para ver uma ideia sair do zero e virar uma solução funcional, sem slides e sem segredos.
+                    </p>
                     <div class="cover-action">
-                        <button id="btn-start" class="btn-primary">INICIAR EXPERIÊNCIA</button>
-                        <p class="nav-hint">Use as setas do teclado ou clique para navegar</p>
+                        <button id="btn-cover-lead" class="btn-primary btn-primary-filled" data-open-lead="cover">QUERO MINHA VAGA</button>
+                        <button id="btn-start" class="btn-secondary">VER A JORNADA</button>
+                        <p class="nav-hint">A jornada completa continua abaixo para quem quiser entender a oportunidade.</p>
                     </div>
                 </div>
             </section>
@@ -248,6 +252,7 @@
                         a forma como<br>
                         <span class="italic animate-text delay-2">o mundo trabalha.</span>
                     </p>
+                    <button class="btn-inline-cta dark animate-text delay-3" data-open-lead="slide-10">Reservar vaga gratuita</button>
                 </div>
             </section>
 
@@ -535,6 +540,7 @@
                     <p class="editorial-text small-med light text-center animate-text">
                         Cada problema resolvido pode se transformar em um produto.
                     </p>
+                    <button class="btn-inline-cta light animate-text delay-1" data-open-lead="slide-30">Quero ver isso na prática</button>
                 </div>
             </section>
 
@@ -943,6 +949,7 @@
                     <p class="editorial-text small-med light text-center italic highlight mt-2 animate-text delay-2">
                         "Mas eu não sei programar..."
                     </p>
+                    <button class="btn-inline-cta light animate-text delay-3" data-open-lead="slide-60">Entrar na lista do workshop</button>
                 </div>
             </section>
 
@@ -1066,7 +1073,7 @@
                         <p>Isso significa que você faz parte da minoria que termina o que começa e busca transformar ideias em soluções reais.</p>
                         <p>Nos próximos dias, vou realizar um <strong>Workshop Prático ao Vivo e Gratuito</strong>. Vou abrir meu computador e construir um projeto real do zero, sem slides e sem segredos.</p>
                     </div>
-                    <button class="btn-cta-final" id="btn-open-modal">Quero Participar do Workshop</button>
+                    <button class="btn-cta-final" id="btn-open-modal" data-open-lead="final">Quero Participar do Workshop</button>
                 </div>
             </section>
 
@@ -1080,22 +1087,24 @@
                 <!-- Formulário de Inscrição -->
                 <div id="final-form-view" class="lead-form-container">
                     <h2 class="form-title">Garanta sua vaga gratuitamente</h2>
+                    <p class="form-intro">Informe para onde devemos enviar o link da transmissão. Você pode completar os outros dados se quiser receber avisos pelo WhatsApp.</p>
                     <form id="lead-form" onsubmit="return false;">
-                        <div class="form-group">
-                            <label class="form-label" for="lead-name">Nome completo</label>
-                            <input type="text" id="lead-name" class="form-input" placeholder="Digite seu nome completo" required autocomplete="name">
-                        </div>
                         <div class="form-group">
                             <label class="form-label" for="lead-email">Email</label>
                             <input type="email" id="lead-email" class="form-input" placeholder="Digite seu melhor email" required autocomplete="email">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="lead-phone">WhatsApp</label>
-                            <input type="tel" id="lead-phone" class="form-input" placeholder="(00) 00000-0000" required>
+                            <label class="form-label" for="lead-name">Nome</label>
+                            <input type="text" id="lead-name" class="form-input" placeholder="Como podemos te chamar?" autocomplete="name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="lead-phone">WhatsApp opcional</label>
+                            <input type="tel" id="lead-phone" class="form-input" placeholder="(00) 00000-0000">
                         </div>
                         <button type="submit" id="btn-submit-lead" class="btn-submit">
                             Confirmar Minha Vaga
                         </button>
+                        <p id="lead-form-error" class="form-error" role="alert"></p>
                         <p class="form-footer-text">
                             Nenhum spam. Seus dados serão usados apenas para enviar o link da transmissão do Workshop.
                         </p>
@@ -1128,6 +1137,6 @@
         
     </div>
 
-    <script src="index.js?v=20260705"></script>
+    <script src="index.js?v=20260705-conversion"></script>
 </body>
 </html>

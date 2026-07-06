@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app');
     const slides = Array.from(document.querySelectorAll('.slide'));
     const btnStart = document.getElementById('btn-start');
+    const leadCtaButtons = Array.from(document.querySelectorAll('[data-open-lead]'));
     const navPrevBtn = document.getElementById('nav-prev-btn');
     const navNextBtn = document.getElementById('nav-next-btn');
     const soundToggleBtn = document.getElementById('sound-toggle');
@@ -67,6 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners
     btnStart.addEventListener('click', startExperience);
+    leadCtaButtons.forEach(button => {
+        button.addEventListener('click', () => openLeadModal(button.dataset.openLead || 'unknown'));
+    });
     navPrevBtn.addEventListener('click', prevSlide);
     navNextBtn.addEventListener('click', nextSlide);
     hotspotLeft.addEventListener('click', prevSlide);
@@ -583,32 +587,67 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.getElementById('btn-open-modal');
     const btnCloseModal = document.getElementById('btn-close-modal');
     const leadForm = document.getElementById('lead-form');
+    const leadFormError = document.getElementById('lead-form-error');
 
-    // Open Modal
-    if (btnOpenModal && leadModal) {
-        // If already registered, update CTA button text
-        if (localStorage.getItem('iabuilder_lead_registered') === 'true') {
-            btnOpenModal.textContent = 'Sua Vaga está Reservada!';
-            btnOpenModal.style.borderColor = '#10b981';
-            btnOpenModal.style.color = '#10b981';
+    function updateLeadCtasAsRegistered() {
+        leadCtaButtons.forEach(button => {
+            button.textContent = 'Sua Vaga está Reservada!';
+            button.style.borderColor = '#10b981';
+            button.style.color = '#10b981';
+        });
+    }
+
+    function showFormError(message) {
+        if (!leadFormError) return;
+        leadFormError.textContent = message;
+        leadFormError.classList.add('active');
+    }
+
+    function clearFormError() {
+        if (!leadFormError) return;
+        leadFormError.textContent = '';
+        leadFormError.classList.remove('active');
+    }
+
+    function openLeadModal(source = 'unknown') {
+        if (!leadModal) return;
+
+        leadModal.dataset.source = source;
+        leadModal.style.display = 'flex';
+        leadModal.offsetHeight;
+        leadModal.classList.add('active');
+        clearFormError();
+
+        if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
+            gtag('event', 'open_lead_modal', {
+                event_category: 'conversion_intent',
+                event_label: source
+            });
         }
 
-        btnOpenModal.addEventListener('click', () => {
-            leadModal.style.display = 'flex';
-            // Force reflow for CSS transition
-            leadModal.offsetHeight;
-            leadModal.classList.add('active');
+        if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
+            fbq('trackCustom', 'OpenLeadModal', {
+                source
+            });
+        }
 
-            // If already registered, skip form and display success view
-            if (localStorage.getItem('iabuilder_lead_registered') === 'true') {
-                const formView = document.getElementById('final-form-view');
-                const successView = document.getElementById('final-success-view');
-                if (formView && successView) {
-                    formView.style.display = 'none';
-                    successView.style.display = 'flex';
-                }
+        // If already registered, skip form and display success view
+        if (localStorage.getItem('iabuilder_lead_registered') === 'true') {
+            const formView = document.getElementById('final-form-view');
+            const successView = document.getElementById('final-success-view');
+            if (formView && successView) {
+                formView.style.display = 'none';
+                successView.style.display = 'flex';
             }
-        });
+        }
+    }
+
+    // Open Modal
+    if (leadModal) {
+        // If already registered, update CTA button text
+        if (localStorage.getItem('iabuilder_lead_registered') === 'true') {
+            updateLeadCtasAsRegistered();
+        }
     }
 
     // Close Modal
@@ -637,6 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (leadForm) {
         leadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            clearFormError();
             
             const btnSubmit = document.getElementById('btn-submit-lead');
             const nameInput = document.getElementById('lead-name');
@@ -651,6 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 name: nameInput.value.trim(),
                 email: emailInput.value.trim(),
                 whatsapp: phoneInput.value.trim(),
+                source: leadModal?.dataset.source || 'unknown',
                 registeredAt: Date.now()
             };
 
@@ -673,13 +714,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Post updated session telemetry with lead data to Firebase
-                await fetch(`https://iabuilder-8a7e7-default-rtdb.firebaseio.com/sessions/${session.id}.json`, {
+                const response = await fetch(`https://iabuilder-8a7e7-default-rtdb.firebaseio.com/sessions/${session.id}.json`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(telemetryPayload)
                 });
+
+                if (!response.ok) {
+                    throw new Error(`Lead registration failed with status ${response.status}`);
+                }
             } catch (err) {
                 console.warn('Telemetry sync error on lead registration:', err);
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Confirmar Minha Vaga';
+                showFormError('Nao conseguimos confirmar sua vaga agora. Verifique sua conexao e tente novamente.');
+                return;
             }
 
             // Save to localStorage for quick client-side reference
@@ -687,17 +736,13 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('iabuilder_lead_name', leadData.name);
 
             // Update CTA button on slide
-            if (btnOpenModal) {
-                btnOpenModal.textContent = 'Sua Vaga está Reservada!';
-                btnOpenModal.style.borderColor = '#10b981';
-                btnOpenModal.style.color = '#10b981';
-            }
+            updateLeadCtasAsRegistered();
 
             // 1. Fire Google Analytics 4 Sign Up event
             if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
                 gtag('event', 'sign_up', {
-                    method: 'Formulário Workshop',
-                    user_email: leadData.email
+                    method: 'Formulario Workshop',
+                    source: leadData.source
                 });
             }
 
@@ -705,7 +750,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
                 fbq('track', 'CompleteRegistration', {
                     content_name: 'Workshop Prático ao Vivo',
-                    status: 'Success'
+                    status: 'Success',
+                    source: leadData.source
                 });
             }
 
