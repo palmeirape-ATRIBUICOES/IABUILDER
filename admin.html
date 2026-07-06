@@ -336,6 +336,27 @@
         </div>
     </div>
 
+    <!-- Converted Paid Leads Table -->
+    <div class="table-panel" style="margin-bottom: 2rem; border-color: #d4af37;">
+        <div class="panel-title" style="color: #d4af37;">Matrículas Premium Realizadas (Vendas R$ 97) <span>Alunos que pagaram e preencheram os dados</span></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>WhatsApp</th>
+                    <th>Data do Pagamento</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="premium-table-body">
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-secondary);">Carregando pagamentos...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
     <!-- Session Log Table -->
     <div class="table-panel">
         <div class="panel-title">Tráfego de Sessões Recentes <span>Últimos acessos de tráfego pago</span></div>
@@ -405,10 +426,49 @@
                 const db = await response.json() || {};
                 const data = Object.entries(db).map(([key, val]) => [key, JSON.stringify(val)]);
                 processAnalytics(data);
+
+                // Fetch premium paid registrations
+                try {
+                    const pResponse = await fetch('https://iabuilder-8a7e7-default-rtdb.firebaseio.com/premium_registrations.json');
+                    const pDb = await pResponse.json() || {};
+                    renderPremiumLeads(pDb);
+                } catch (err) {
+                    console.warn('Erro ao carregar matrículas premium:', err);
+                }
             } catch (err) {
                 console.error(err);
                 alert('Erro ao carregar telemetria de tráfego. Tente novamente em alguns segundos.');
             }
+        }
+
+        function renderPremiumLeads(db) {
+            const tbody = document.getElementById('premium-table-body');
+            tbody.innerHTML = '';
+            const list = Object.values(db);
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Nenhum pagamento confirmado ainda.</td></tr>`;
+                return;
+            }
+            // Sort by date desc
+            list.sort((a, b) => b.registeredAt - a.registeredAt);
+            list.forEach(item => {
+                const tr = document.createElement('tr');
+                const date = new Date(item.registeredAt).toLocaleString('pt-BR');
+                const cleanPhone = item.whatsapp.replace(/\D/g, '');
+                const waLink = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent('Olá ' + item.name + ', tudo bem? Recebi sua matrícula premium no IA Builder e estou entrando em contato para enviar o link do treinamento online.')}`;
+                tr.innerHTML = `
+                    <td style="font-weight: 700; color: #fff;">${item.name}</td>
+                    <td>${item.email}</td>
+                    <td><a href="${waLink}" target="_blank" style="color: #10b981; font-weight: 700; text-decoration: underline;">${item.whatsapp}</a></td>
+                    <td>${date}</td>
+                    <td>
+                        <a href="${waLink}" target="_blank" style="padding: 4px 8px; background: #10b981; color: #000; border-radius: 4px; font-size: 0.8rem; font-weight: 800; text-decoration: none; display: inline-block;">
+                            CONTATAR 💬
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         function processAnalytics(rows) {

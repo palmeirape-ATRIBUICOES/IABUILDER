@@ -1123,6 +1123,83 @@
             </div>
         </div>
 
+        <!-- Modal Popup para Pagamento Premium (Bloqueio Slide 21) -->
+        <div id="premium-payment-modal" class="modal-backdrop">
+            <div class="modal-content premium-modal-content" style="border-color: #d4af37;">
+                <button class="modal-close-btn" id="btn-close-premium-modal" aria-label="Fechar">&times;</button>
+                
+                <!-- Estado 1: Inserir WhatsApp -->
+                <div id="premium-whatsapp-view" class="lead-form-container">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">👑</div>
+                    <h2 class="form-title">Desbloqueie o Próximo Nível</h2>
+                    <p class="form-intro" style="color: #d4af37; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center;">Treinamento Online Completo</p>
+                    <p class="form-intro">Você chegou ao final da demonstração gratuita. Para liberar os próximos cards e ter acesso ao treinamento completo, adquira sua vaga por apenas <strong>R$ 97,00</strong> no Pix.</p>
+                    
+                    <form id="premium-whatsapp-form" onsubmit="return false;">
+                        <div class="form-group">
+                            <label class="form-label" for="premium-whatsapp-input">Seu WhatsApp</label>
+                            <input type="tel" id="premium-whatsapp-input" class="form-input" placeholder="(00) 90000-0000" required>
+                        </div>
+                        <button type="submit" id="btn-generate-pix" class="btn-submit" style="background: linear-gradient(135deg, #d4af37, #aa7c11); color: #000; font-weight: 800; border: none; cursor: pointer;">
+                            GERAR QR CODE PIX
+                        </button>
+                        <p id="premium-whatsapp-error" class="form-error" role="alert"></p>
+                    </form>
+                </div>
+
+                <!-- Estado 2: Pix QR Code e Copia/Cola -->
+                <div id="premium-pix-view" class="lead-form-container" style="display: none;">
+                    <h2 class="form-title">Aguardando Pagamento...</h2>
+                    <p class="form-intro">Escaneie o código QR abaixo ou copie a chave Pix para realizar o pagamento de <strong>R$ 97,00</strong>.</p>
+                    
+                    <div class="qr-code-wrapper" style="background: #fff; padding: 12px; border-radius: 18px; width: 220px; height: 220px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <img id="premium-pix-qr" src="" alt="Pix QR Code" style="width: 100%; display: none;">
+                        <div id="qr-loading-spinner" class="spinner" style="border: 4px solid rgba(0,0,0,0.1); border-left-color: #d4af37; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; position: absolute;"></div>
+                    </div>
+
+                    <button id="btn-copy-pix" class="btn-submit" style="background: rgba(255,255,255,0.05); border: 1px solid #d4af37; color: #d4af37; font-weight: 700; margin-bottom: 12px; cursor: pointer;">
+                        COPIAR CÓDIGO PIX 📋
+                    </button>
+                    <button id="btn-cancel-pix" class="btn-close" style="background: none; border: none; color: #6b7280; font-size: 0.85rem; cursor: pointer; text-decoration: underline;">
+                        Voltar
+                    </button>
+                    
+                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 15px; text-align: center;">
+                        A liberação é 100% automática após o pagamento.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Popup para Cadastro Pós-Pagamento -->
+        <div id="premium-register-modal" class="modal-backdrop">
+            <div class="modal-content premium-modal-content" style="border-color: #10b981;">
+                <div id="premium-register-view" class="lead-form-container">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; text-align: center;">🎉</div>
+                    <h2 class="form-title" style="color: #10b981; text-align: center;">Pagamento Confirmado!</h2>
+                    <p class="form-intro">Parabéns! Seu acesso premium foi liberado automaticamente. Preencha seus dados abaixo para receber o link do treinamento online e ser contatado.</p>
+                    
+                    <form id="premium-register-form" onsubmit="return false;">
+                        <div class="form-group">
+                            <label class="form-label" for="premium-reg-name">Nome Completo</label>
+                            <input type="text" id="premium-reg-name" class="form-input" placeholder="Seu nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="premium-reg-email">Email</label>
+                            <input type="email" id="premium-reg-email" class="form-input" placeholder="Seu melhor email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="premium-reg-phone">WhatsApp</label>
+                            <input type="tel" id="premium-reg-phone" class="form-input" placeholder="(00) 90000-0000" required readonly>
+                        </div>
+                        <button type="submit" id="btn-submit-premium-register" class="btn-submit" style="background: #10b981; color: #000; font-weight: 800; border: none; cursor: pointer;">
+                            LIBERAR PRÓXIMOS CARDS 🚀
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- Navigation Buttons -->
         <button class="nav-btn nav-prev" id="nav-prev-btn" aria-label="Página anterior">
             <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -1137,6 +1214,6 @@
         
     </div>
 
-    <script src="index.js?v=20260705-conversion"></script>
+    <script src="index.js?v=20260706-payment-flow"></script>
 </body>
 </html>
