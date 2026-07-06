@@ -47,7 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     app.classList.add('intro-active'); // Ensure intro class is present on load
     initProgressIndicators();
     updateNavigationState();
-    trackSlideView(0);
+    try {
+        trackSlideView(0);
+    } catch (e) {
+        console.warn('[Analytics] Failed to track initial view:', e);
+    }
 
     // Mobile Web Audio API Unlock Helper
     const unlockAudio = () => {
@@ -187,7 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fire paid traffic analytics tracking events (GA4, Facebook Pixel, Clarity)
-        trackSlideView(currentSlideIndex);
+        try {
+            trackSlideView(currentSlideIndex);
+        } catch (e) {
+            console.warn('[Analytics] Failed to track slide view:', e);
+        }
 
         updateNavigationState();
         resetAutoplayTimer();
@@ -510,6 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function trackSlideView(index) {
+        try {
         const virtualUrl = index === 0 ? '/' : `/card-${index}`;
         const pageName = index === 0 ? 'Capa do Livro' : `Card ${String(index).padStart(2, '0')}`;
         
@@ -577,6 +586,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index === bookSlidesCount) {
                 clarity("set", "reading_finished", "true");
             }
+        }
+        } catch (e) {
+            console.error('[Analytics] trackSlideView error:', e);
         }
     }
 
