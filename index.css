@@ -1015,30 +1015,32 @@ body, html {
     
     /* Cover adjustments to prevent vertical overflow */
     .cover-title {
-        font-size: clamp(1.8rem, 5.5vw, 3rem);
-        margin-bottom: 1rem;
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+        margin-bottom: 0.8rem;
     }
     
     .cover-subtitle {
-        margin-bottom: 1rem;
+        margin-bottom: 0.8rem;
+        font-size: clamp(0.85rem, 3vw, 1.05rem);
     }
     
     .cover-brand {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
 
     .cover-offer {
-        margin-bottom: 2rem;
+        margin-bottom: 1.2rem;
     }
 
     .cover-action {
         flex-direction: column;
         width: 100%;
+        gap: 0.6rem;
     }
     
     .btn-primary,
     .btn-secondary {
-        padding: 1rem 2.2rem;
+        padding: 0.85rem 2rem;
         font-size: 0.8rem;
         width: 100%;
         max-width: 320px;
@@ -1046,46 +1048,46 @@ body, html {
     
     /* Content slides text adjustments for narrow mobile viewports */
     .editorial-text {
-        font-size: clamp(1.4rem, 5.5vw, 2.0rem);
+        font-size: clamp(1.1rem, 4.2vw, 1.55rem);
         line-height: 1.35;
         padding: 0 0.5rem;
     }
     
     .editorial-text.medium {
-        font-size: clamp(1.3rem, 5vw, 1.8rem);
+        font-size: clamp(1.0rem, 3.8vw, 1.35rem);
     }
     
     .editorial-text.medium-large {
-        font-size: clamp(1.4rem, 5.2vw, 1.9rem);
+        font-size: clamp(1.1rem, 4vw, 1.45rem);
     }
 
     .editorial-text.small-med {
-        font-size: clamp(1.2rem, 4.5vw, 1.55rem);
+        font-size: clamp(0.95rem, 3.5vw, 1.25rem);
     }
     
     .editorial-text.small {
-        font-size: clamp(1.1rem, 4vw, 1.35rem);
+        font-size: clamp(0.85rem, 3vw, 1.1rem);
     }
     
     .editorial-text.giant,
     .editorial-text.giant-italic {
-        font-size: clamp(1.8rem, 6vw, 2.45rem);
+        font-size: clamp(1.3rem, 4.8vw, 1.9rem);
         line-height: 1.3;
     }
     
     .editorial-text.block-poetry {
-        font-size: clamp(1.3rem, 5vw, 1.8rem);
+        font-size: clamp(1.0rem, 3.8vw, 1.35rem);
         line-height: 1.5;
     }
     
     .editorial-tag {
-        font-size: 0.75rem;
-        margin-bottom: 0.8rem;
+        font-size: 0.7rem;
+        margin-bottom: 0.6rem;
     }
     
     .slide-content.bottom-left, 
     .slide-content.bottom-center {
-        padding-bottom: 6.5rem;
+        padding-bottom: 4.5rem;
         padding-left: 1.2rem;
         padding-right: 1.2rem;
     }
