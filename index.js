@@ -818,7 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
         premiumWhatsappError.textContent = '';
         premiumWhatsappError.classList.remove('active');
         btnGeneratePix.disabled = false;
-        btnGeneratePix.textContent = 'IR PARA O PAGAMENTO (PIX/CARTÃO) 💳';
+        btnGeneratePix.textContent = 'IR PARA O PAGAMENTO 🚀';
     }
 
     function closePremiumModal() {
@@ -864,34 +864,51 @@ document.addEventListener('DOMContentLoaded', () => {
             btnGeneratePix.textContent = 'REDIRECIONANDO...';
 
             try {
-                const response = await fetch('/api/payment/pix', {
-                    method: 'POST',
+                // Save lead checkout intent to Firebase
+                const session = getOrCreateSession();
+                const telemetryPayload = {
+                    id: session.id,
+                    startTime: session.start,
+                    lastActive: Date.now(),
+                    maxPage: currentSlideIndex,
+                    currentPage: currentSlideIndex,
+                    utmSource: session.utmSource,
+                    utmMedium: session.utmMedium,
+                    utmCampaign: session.utmCampaign,
+                    adId: session.adId,
+                    referrer: session.referrer,
+                    device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+                    lead: {
+                        whatsapp: phone,
+                        source: 'premium_checkout_intent',
+                        registeredAt: Date.now()
+                    }
+                };
+
+                // Sync telemetry payload to Firebase Realtime Database
+                await fetch(`https://iabuilder-8a7e7-default-rtdb.firebaseio.com/sessions/${session.id}.json`, {
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ whatsapp: phone })
-                });
+                    body: JSON.stringify(telemetryPayload)
+                }).catch(err => console.warn('Telemetry offline', err));
 
-                const data = await response.json();
-                if (data.success && data.initPoint) {
-                    // Track Pix/Checkout initiation
-                    if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
-                        gtag('event', 'begin_checkout', { value: 97.00, currency: 'BRL' });
-                    }
-                    if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
-                        fbq('track', 'InitiateCheckout', { value: 97.00, currency: 'BRL' });
-                    }
-
-                    // Redirect user to Mercado Pago secure checkout
-                    window.location.href = data.initPoint;
-
-                } else {
-                    throw new Error(data.error || 'Erro ao gerar o checkout de pagamento.');
+                // Track Pix/Checkout initiation
+                if (typeof gtag === 'function' && window.ANALYTICS_CONFIG.googleAnalyticsId && window.ANALYTICS_CONFIG.googleAnalyticsId !== 'G-SEU-ID-GA4') {
+                    gtag('event', 'begin_checkout', { value: 97.00, currency: 'BRL' });
                 }
+                if (typeof fbq === 'function' && window.ANALYTICS_CONFIG.metaPixelId && window.ANALYTICS_CONFIG.metaPixelId !== 'SEU-ID-META-PIXEL') {
+                    fbq('track', 'InitiateCheckout', { value: 97.00, currency: 'BRL' });
+                }
+
+                // Redirect user to Kiwify checkout
+                window.location.href = 'https://pay.kiwify.com.br/ZSDq3ba';
+
             } catch (err) {
                 console.error(err);
-                premiumWhatsappError.textContent = err.message || 'Erro de conexão com o gateway. Tente novamente.';
+                premiumWhatsappError.textContent = 'Erro ao processar o redirecionamento. Tente novamente.';
                 premiumWhatsappError.classList.add('active');
                 btnGeneratePix.disabled = false;
-                btnGeneratePix.textContent = 'IR PARA O PAGAMENTO (PIX/CARTÃO) 💳';
+                btnGeneratePix.textContent = 'IR PARA O PAGAMENTO 🚀';
             }
         });
     }
@@ -964,8 +981,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check query parameters for success callback on page load
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment_success') === 'true' && urlParams.get('whatsapp')) {
-        const whatsappVal = urlParams.get('whatsapp');
+    if (urlParams.get('payment_success') === 'true') {
+        const whatsappVal = urlParams.get('whatsapp') || 'KiwifyUser';
         
         // Clean URL to keep it pretty
         window.history.replaceState({}, document.title, window.location.pathname);
